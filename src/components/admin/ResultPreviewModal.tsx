@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { generateEnneagramPDF, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
+import { supabase } from "@/integrations/supabase/client";
+import logoSrc from "@/assets/logo.png";
 
 interface ResultData {
   id: string;
@@ -52,7 +60,53 @@ const TypeBar = ({ name, pct, color }: { name: string; pct: number; color: strin
 );
 
 const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
+  const [level, setLevel] = useState<ReportLevel>("basico");
+  const [generating, setGenerating] = useState(false);
+
   if (!result) return null;
+
+  const handleGeneratePDF = async () => {
+    setGenerating(true);
+    toast.info(`Gerando relatório ${REPORT_LEVEL_LABELS[level]}...`);
+    try {
+      const needsSkills = level !== "basico";
+      const [logoBase64, skills] = await Promise.all([
+        (async () => {
+          try {
+            const resp = await fetch(logoSrc);
+            const blob = await resp.blob();
+            return await new Promise<string>((res) => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          } catch { return undefined; }
+        })(),
+        needsSkills
+          ? (async () => {
+              try {
+                const { data, error } = await supabase.functions.invoke("enneagram-skills", {
+                  body: {
+                    type_1_name: result.type_1_name, type_1_pct: result.type_1_pct,
+                    type_2_name: result.type_2_name, type_2_pct: result.type_2_pct,
+                    type_3_name: result.type_3_name, type_3_pct: result.type_3_pct,
+                    wing: result.wing, dominant_subtype: result.dominant_subtype,
+                  },
+                });
+                if (error) throw error;
+                return data;
+              } catch { return null; }
+            })()
+          : Promise.resolve(null),
+      ]);
+      generateEnneagramPDF({ ...result, profiles: { display_name: result.display_name, phone: result.phone } } as any, logoBase64, skills, level);
+      toast.success("PDF gerado!");
+    } catch {
+      toast.error("Erro ao gerar PDF");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", {
@@ -157,6 +211,36 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
             <StatItem label="Telefone" value={result.phone} />
           </>
         )}
+
+        <Separator />
+
+        {/* Generate PDF */}
+        <div className="flex items-center gap-3">
+          <Select value={level} onValueChange={(v) => setLevel(v as ReportLevel)}>
+            <SelectTrigger className="w-[160px] h-9 rounded-lg font-body text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(REPORT_LEVEL_LABELS) as ReportLevel[]).map((l) => (
+                <SelectItem key={l} value={l} className="font-body text-xs">
+                  {REPORT_LEVEL_LABELS[l]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={handleGeneratePDF}
+            disabled={generating}
+            className="gap-2 rounded-xl font-body flex-1"
+          >
+            {generating ? (
+              <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            Gerar PDF
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
