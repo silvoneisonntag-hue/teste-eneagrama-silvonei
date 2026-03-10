@@ -144,7 +144,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     const subtypeMatch = fullText.match(subtypePattern);
     const dominantSubtype = subtypeMatch ? subtypeMatch[1] : null;
 
-    const { error } = await supabase.from("enneagram_results").insert({
+    const { error } = await supabase.from("enneagram_results").insert([{
       user_id: user.id,
       type_1_name: type1Name,
       type_1_pct: type1Pct,
@@ -153,9 +153,9 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       type_3_name: type3Name,
       type_3_pct: type3Pct,
       dominant_subtype: dominantSubtype,
-      conversation: messages as unknown as Record<string, unknown>[],
+      conversation: JSON.parse(JSON.stringify(messages)) as Json,
       summary: lastAssistantMsg.content,
-    });
+    }]);
 
     if (error) {
       toast.error("Erro ao salvar resultado");
