@@ -102,20 +102,15 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     }
   };
 
-  const saveResults = async () => {
-    if (!user || saved) return;
+  // Auto-save results silently when interview finishes
+  const autoSaveResults = async () => {
+    if (!user || autoSaved) return;
 
-    // Get the last assistant message as summary
-    const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
-    if (!lastAssistantMsg) return;
-
-    // Try to parse type info from the last messages
     const fullText = messages
       .filter((m) => m.role === "assistant")
       .map((m) => m.content)
       .join("\n");
 
-    // Simple extraction - look for patterns like "Tipo X" with percentages
     const typePattern = /Tipo\s+(\d+)\s*[—–-]\s*([^(]+?)\s*\((\d+)%\)/gi;
     const matches = [...fullText.matchAll(typePattern)];
 
@@ -139,12 +134,13 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       type3Pct = parseInt(matches[2][3]);
     }
 
-    // Extract subtype
     const subtypePattern = /subtipo\s+predominante[:\s]*(\w+)/i;
     const subtypeMatch = fullText.match(subtypePattern);
     const dominantSubtype = subtypeMatch ? subtypeMatch[1] : null;
 
-    const { error } = await supabase.from("enneagram_results").insert([{
+    const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
+
+    await supabase.from("enneagram_results").insert([{
       user_id: user.id,
       type_1_name: type1Name,
       type_1_pct: type1Pct,
@@ -154,15 +150,10 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       type_3_pct: type3Pct,
       dominant_subtype: dominantSubtype,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
-      summary: lastAssistantMsg.content,
+      summary: lastAssistantMsg?.content || null,
     }]);
 
-    if (error) {
-      toast.error("Erro ao salvar resultado");
-    } else {
-      setSaved(true);
-      toast.success("Resultado salvo no seu histórico!");
-    }
+    setAutoSaved(true);
   };
 
   const resetInterview = () => {
