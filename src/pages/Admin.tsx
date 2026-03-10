@@ -90,19 +90,45 @@ const Admin = () => {
   };
 
   const handleGeneratePDF = async (result: ResultWithProfile) => {
-    // Convert logo to base64
-    let logoBase64: string | undefined;
-    try {
-      const response = await fetch(logoSrc);
-      const blob = await response.blob();
-      logoBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
-    } catch { /* proceed without logo */ }
+    toast.info("Gerando relatório com IA...");
 
-    generateEnneagramPDF(result, logoBase64);
+    // Fetch logo and skills in parallel
+    const [logoBase64, skills] = await Promise.all([
+      (async () => {
+        try {
+          const response = await fetch(logoSrc);
+          const blob = await response.blob();
+          return await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        } catch { return undefined; }
+      })(),
+      (async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke("enneagram-skills", {
+            body: {
+              type_1_name: result.type_1_name,
+              type_1_pct: result.type_1_pct,
+              type_2_name: result.type_2_name,
+              type_2_pct: result.type_2_pct,
+              type_3_name: result.type_3_name,
+              type_3_pct: result.type_3_pct,
+              wing: result.wing,
+              dominant_subtype: result.dominant_subtype,
+            },
+          });
+          if (error) throw error;
+          return data;
+        } catch (e) {
+          console.error("Skills generation failed:", e);
+          return null;
+        }
+      })(),
+    ]);
+
+    generateEnneagramPDF(result, logoBase64, skills);
     toast.success("PDF gerado com sucesso!");
   };
 
