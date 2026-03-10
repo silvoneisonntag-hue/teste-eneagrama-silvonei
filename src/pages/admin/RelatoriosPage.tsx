@@ -44,6 +44,7 @@ const RelatoriosPage = () => {
   const [selectedLevels, setSelectedLevels] = useState<Record<string, ReportLevel>>({});
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [previewRow, setPreviewRow] = useState<ReportRow | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
