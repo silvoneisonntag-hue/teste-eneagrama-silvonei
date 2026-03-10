@@ -28,17 +28,19 @@ interface SkillsData {
   habilidades_desenvolver: string[];
 }
 
-// Color palette matching the app theme
+// New color palette: white background with dark purple text
 const COLORS = {
-  darkPurple: [18, 10, 31] as [number, number, number],
-  gold: [238, 179, 42] as [number, number, number],
-  goldLight: [255, 215, 100] as [number, number, number],
   white: [255, 255, 255] as [number, number, number],
-  lightGray: [200, 200, 210] as [number, number, number],
-  mediumGray: [140, 130, 150] as [number, number, number],
-  green: [72, 199, 142] as [number, number, number],
-  orange: [255, 159, 67] as [number, number, number],
-  blue: [100, 149, 237] as [number, number, number],
+  darkPurple: [35, 20, 60] as [number, number, number],
+  purple: [60, 35, 100] as [number, number, number],
+  purpleLight: [100, 70, 150] as [number, number, number],
+  gold: [180, 130, 20] as [number, number, number],
+  goldDark: [150, 110, 15] as [number, number, number],
+  gray: [120, 110, 130] as [number, number, number],
+  lightGray: [230, 225, 235] as [number, number, number],
+  green: [40, 140, 90] as [number, number, number],
+  orange: [200, 120, 30] as [number, number, number],
+  blue: [60, 100, 180] as [number, number, number],
 };
 
 export type ReportLevel = "basico" | "intermediario" | "completo";
@@ -57,8 +59,8 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   const contentW = pageW - margin * 2;
   let y = 0;
 
-  const checkPage = (needed: number = 20) => {
-    if (y > pageH - 30 - needed) {
+  const checkPage = (needed: number = 14) => {
+    if (y > pageH - 20 - needed) {
       doc.addPage();
       y = margin;
       addPageBg();
@@ -66,11 +68,11 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   };
 
   const addPageBg = () => {
-    doc.setFillColor(...COLORS.darkPurple);
+    doc.setFillColor(...COLORS.white);
     doc.rect(0, 0, pageW, pageH, "F");
   };
 
-  const addText = (text: string, size: number = 10, color: [number, number, number] = COLORS.lightGray, bold = false, maxWidth = contentW) => {
+  const addText = (text: string, size: number = 10, color: [number, number, number] = COLORS.darkPurple, bold = false, maxWidth = contentW) => {
     doc.setFontSize(size);
     doc.setFont("helvetica", bold ? "bold" : "normal");
     doc.setTextColor(...color);
@@ -78,60 +80,61 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
     for (const line of lines) {
       checkPage();
       doc.text(line, margin, y);
-      y += size * 0.45 + 1;
+      y += size * 0.42;
     }
-    y += 2;
+    y += 1;
   };
 
-  const addCenteredText = (text: string, size: number, color: [number, number, number] = COLORS.gold, bold = true) => {
+  const addCenteredText = (text: string, size: number, color: [number, number, number] = COLORS.darkPurple, bold = true) => {
     doc.setFontSize(size);
     doc.setFont("helvetica", bold ? "bold" : "normal");
     doc.setTextColor(...color);
     doc.text(text, pageW / 2, y, { align: "center" });
-    y += size * 0.45 + 2;
+    y += size * 0.42 + 1;
   };
 
   const addSectionTitle = (title: string) => {
-    checkPage(15);
-    y += 4;
-    doc.setDrawColor(...COLORS.gold);
+    checkPage(12);
+    y += 3;
+    doc.setDrawColor(...COLORS.purple);
     doc.setLineWidth(0.8);
-    doc.line(margin, y, margin + 30, y);
-    y += 6;
-    doc.setFontSize(13);
+    doc.line(margin, y, margin + 25, y);
+    y += 5;
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(...COLORS.gold);
+    doc.setTextColor(...COLORS.purple);
     doc.text(title, margin, y);
-    y += 8;
+    y += 6;
   };
 
   const addSeparator = () => {
-    checkPage(8);
-    doc.setDrawColor(...COLORS.mediumGray);
+    checkPage(6);
+    y += 1;
+    doc.setDrawColor(...COLORS.lightGray);
     doc.setLineWidth(0.3);
     doc.line(margin, y, pageW - margin, y);
-    y += 6;
+    y += 4;
   };
 
   const addField = (label: string, value: string) => {
     checkPage();
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(...COLORS.mediumGray);
+    doc.setTextColor(...COLORS.gray);
     doc.text(label, margin, y);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(...COLORS.white);
+    doc.setTextColor(...COLORS.darkPurple);
     doc.text(value, margin + 50, y);
-    y += 6;
+    y += 5;
   };
 
   // === Draw horizontal bar chart for types ===
   const drawTypesChart = () => {
-    checkPage(60);
+    checkPage(50);
     addSectionTitle("GRÁFICO DE TIPOS PROVÁVEIS");
 
     const types: { name: string; pct: number; color: [number, number, number] }[] = [];
-    if (result.type_1_pct > 0) types.push({ name: result.type_1_name, pct: result.type_1_pct, color: COLORS.gold });
+    if (result.type_1_pct > 0) types.push({ name: result.type_1_name, pct: result.type_1_pct, color: COLORS.purple });
     if (result.type_2_name && result.type_2_pct && result.type_2_pct > 0) {
       types.push({ name: result.type_2_name, pct: result.type_2_pct, color: COLORS.blue });
     }
@@ -139,77 +142,71 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
       types.push({ name: result.type_3_name, pct: result.type_3_pct, color: COLORS.green });
     }
 
-    const barH = 12;
-    const barGap = 6;
+    const barH = 10;
+    const barGap = 4;
     const labelW = 55;
     const maxBarW = contentW - labelW - 25;
 
     for (const t of types) {
       checkPage(barH + barGap);
 
-      // Label
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(...COLORS.white);
+      doc.setTextColor(...COLORS.darkPurple);
       doc.text(t.name, margin, y + barH / 2 + 1);
 
-      // Background bar
       const barX = margin + labelW;
-      doc.setFillColor(40, 30, 55);
-      doc.roundedRect(barX, y - 2, maxBarW, barH, 3, 3, "F");
+      doc.setFillColor(...COLORS.lightGray);
+      doc.roundedRect(barX, y - 1, maxBarW, barH, 2, 2, "F");
 
-      // Value bar
       const barW = (t.pct / 100) * maxBarW;
       doc.setFillColor(...t.color);
-      doc.roundedRect(barX, y - 2, barW, barH, 3, 3, "F");
+      doc.roundedRect(barX, y - 1, barW, barH, 2, 2, "F");
 
-      // Percentage text
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(...COLORS.white);
+      doc.setTextColor(...COLORS.darkPurple);
       doc.text(`${t.pct}%`, barX + maxBarW + 3, y + barH / 2 + 1);
 
       y += barH + barGap;
     }
-    y += 4;
+    y += 2;
   };
 
   // === Draw skills sections ===
   const drawSkills = (skillsData: SkillsData) => {
-    // Natural skills
-    checkPage(30);
+    checkPage(25);
     addSectionTitle("HABILIDADES NATURAIS");
     
     for (const skill of skillsData.habilidades_naturais) {
-      checkPage(8);
+      checkPage(6);
       doc.setFillColor(...COLORS.green);
-      doc.circle(margin + 3, y - 1.5, 1.5, "F");
-      doc.setFontSize(10);
+      doc.circle(margin + 3, y - 1, 1.5, "F");
+      doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(...COLORS.white);
+      doc.setTextColor(...COLORS.darkPurple);
       doc.text(skill, margin + 8, y);
-      y += 7;
+      y += 5;
     }
 
-    y += 4;
+    y += 2;
     addSeparator();
 
-    // Skills to develop
-    checkPage(30);
+    checkPage(25);
     addSectionTitle("HABILIDADES A DESENVOLVER");
     
     for (const skill of skillsData.habilidades_desenvolver) {
-      checkPage(8);
+      checkPage(6);
       doc.setFillColor(...COLORS.orange);
-      doc.circle(margin + 3, y - 1.5, 1.5, "F");
-      doc.setFontSize(10);
+      doc.circle(margin + 3, y - 1, 1.5, "F");
+      doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(...COLORS.white);
+      doc.setTextColor(...COLORS.darkPurple);
       doc.text(skill, margin + 8, y);
-      y += 7;
+      y += 5;
     }
 
-    y += 4;
+    y += 2;
   };
 
   const userName = result.profiles?.display_name || "Não informado";
@@ -218,41 +215,41 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   // === PAGE 1: Cover / Header ===
   addPageBg();
 
-  // Top gold bar
-  doc.setFillColor(...COLORS.gold);
+  // Top purple bar
+  doc.setFillColor(...COLORS.purple);
   doc.rect(0, 0, pageW, 4, "F");
 
   // Logo
   if (logoBase64) {
-    const logoW = 40;
-    const logoH = 40;
+    const logoW = 36;
+    const logoH = 36;
     doc.addImage(logoBase64, "PNG", pageW / 2 - logoW / 2, 10, logoW, logoH);
-    y = 55;
+    y = 52;
   } else {
-    y = 35;
+    y = 30;
   }
 
   // Title
   const levelLabel = REPORT_LEVEL_LABELS[level].toUpperCase();
-  addCenteredText(`RELATÓRIO ${levelLabel} DE ENEAGRAMA`, 22, COLORS.gold);
-  y += 2;
-  addCenteredText("Análise Personalizada de Personalidade", 11, COLORS.mediumGray, false);
-  y += 8;
-
-  // Gold decorative line
-  doc.setDrawColor(...COLORS.gold);
-  doc.setLineWidth(0.5);
-  doc.line(pageW / 2 - 40, y, pageW / 2 + 40, y);
-  y += 12;
-
-  // Main type highlight
-  addCenteredText(result.type_1_name, 20, COLORS.white);
-  addCenteredText(`${result.type_1_pct}%`, 28, COLORS.gold);
+  addCenteredText(`RELATÓRIO ${levelLabel} DE ENEAGRAMA`, 20, COLORS.darkPurple);
+  y += 1;
+  addCenteredText("Análise Personalizada de Personalidade", 10, COLORS.gray, false);
   y += 5;
 
+  // Decorative line
+  doc.setDrawColor(...COLORS.purple);
+  doc.setLineWidth(0.5);
+  doc.line(pageW / 2 - 35, y, pageW / 2 + 35, y);
+  y += 8;
+
+  // Main type highlight
+  addCenteredText(result.type_1_name, 18, COLORS.darkPurple);
+  addCenteredText(`${result.type_1_pct}%`, 24, COLORS.purple);
+  y += 3;
+
   if (result.type_2_name) {
-    addCenteredText(`2º ${result.type_2_name} (${result.type_2_pct}%)  ·  3º ${result.type_3_name || "—"} (${result.type_3_pct || 0}%)`, 10, COLORS.lightGray, false);
-    y += 3;
+    addCenteredText(`2º ${result.type_2_name} (${result.type_2_pct}%)  ·  3º ${result.type_3_name || "—"} (${result.type_3_pct || 0}%)`, 9, COLORS.gray, false);
+    y += 2;
   }
 
   addSeparator();
@@ -281,8 +278,8 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
     if (result.health_level) addField("Nível de Saúde:", `${result.health_level}/9`);
 
     if (result.subtype_preservation != null || result.subtype_social != null || result.subtype_sexual != null) {
-      y += 3;
-      addText("Distribuição de Subtipos:", 10, COLORS.mediumGray, true);
+      y += 2;
+      addText("Distribuição de Subtipos:", 9, COLORS.gray, true);
       if (result.subtype_preservation != null) addField("  Autopreservação:", `${result.subtype_preservation}%`);
       if (result.subtype_social != null) addField("  Social:", `${result.subtype_social}%`);
       if (result.subtype_sexual != null) addField("  Sexual:", `${result.subtype_sexual}%`);
@@ -301,13 +298,13 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   if (level === "completo" && (result.integration_direction || result.disintegration_direction)) {
     addSectionTitle("DIREÇÕES DE CRESCIMENTO");
     if (result.integration_direction) {
-      addText("Direção de Integração (crescimento):", 10, COLORS.mediumGray, true);
-      addText(result.integration_direction, 10, COLORS.lightGray);
-      y += 2;
+      addText("Direção de Integração (crescimento):", 9, COLORS.gray, true);
+      addText(result.integration_direction, 9, COLORS.darkPurple);
+      y += 1;
     }
     if (result.disintegration_direction) {
-      addText("Direção de Desintegração (estresse):", 10, COLORS.mediumGray, true);
-      addText(result.disintegration_direction, 10, COLORS.lightGray);
+      addText("Direção de Desintegração (estresse):", 9, COLORS.gray, true);
+      addText(result.disintegration_direction, 9, COLORS.darkPurple);
     }
     addSeparator();
   }
@@ -316,26 +313,34 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   if (level === "completo" && result.summary) {
     addSectionTitle("ANÁLISE COMPLETA");
     const cleanSummary = result.summary.replace(/[#*_`]/g, "");
-    addText(cleanSummary, 10, COLORS.lightGray);
+    addText(cleanSummary, 9, COLORS.darkPurple);
     addSeparator();
   }
 
   // === Footer on last page ===
-  y = Math.max(y, 250);
-  checkPage(30);
-  doc.setDrawColor(...COLORS.gold);
+  const footerY = Math.max(y + 5, pageH - 30);
+  if (footerY > pageH - 20) {
+    doc.addPage();
+    addPageBg();
+    y = pageH - 30;
+  } else {
+    y = footerY;
+  }
+  
+  doc.setDrawColor(...COLORS.purple);
   doc.setLineWidth(0.3);
   doc.line(margin, y, pageW - margin, y);
-  y += 8;
-  doc.setFontSize(8);
+  y += 6;
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(...COLORS.mediumGray);
+  doc.setTextColor(...COLORS.gray);
   doc.text("© 2026 Silvonei Sonntag Desenvolvimento Humano Ltda — Todos os direitos reservados", pageW / 2, y, { align: "center" });
-  y += 5;
+  y += 4;
+  doc.setTextColor(...COLORS.purpleLight);
   doc.text("Este relatório é apenas indicativo e não substitui avaliação profissional.", pageW / 2, y, { align: "center" });
 
-  // Bottom gold bar
-  doc.setFillColor(...COLORS.gold);
+  // Bottom purple bar
+  doc.setFillColor(...COLORS.purple);
   doc.rect(0, pageH - 4, pageW, 4, "F");
 
   const fileName = `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
