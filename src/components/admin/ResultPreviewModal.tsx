@@ -64,6 +64,7 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
   const [generating, setGenerating] = useState(false);
 
   if (!result) return null;
+  if (!open) return null;
 
   const handleGeneratePDF = async () => {
     setGenerating(true);
