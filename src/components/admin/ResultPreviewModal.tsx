@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { generateEnneagramPDF, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
+import { supabase } from "@/integrations/supabase/client";
+import logoSrc from "@/assets/logo.png";
 
 interface ResultData {
   id: string;
