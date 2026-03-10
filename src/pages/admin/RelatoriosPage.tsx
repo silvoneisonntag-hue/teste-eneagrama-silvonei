@@ -203,9 +203,9 @@ const RelatoriosPage = () => {
 
       window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       toast.success("WhatsApp aberto com o link do relatório!");
-    } catch (err) {
+    } catch (err: any) {
       console.error("WhatsApp send error:", err);
-      toast.error("Erro ao preparar envio por WhatsApp");
+      toast.error(`Erro ao preparar envio: ${err?.message || err?.statusCode || "Erro desconhecido"}`);
     } finally {
       setSendingId(null);
     }
