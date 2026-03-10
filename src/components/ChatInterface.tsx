@@ -212,9 +212,36 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       type3Pct = uniqueMatches[2].pct;
     }
 
-    const subtypePattern = /subtipo\s+predominante[:\s]*(\w+)/i;
-    const subtypeMatch = fullText.match(subtypePattern);
-    const dominantSubtype = subtypeMatch ? subtypeMatch[1] : null;
+    // Extract subtypes with broader patterns
+    const subtypePatterns = [
+      /subtipo\s+(?:predominante|dominante)[:\s]*(\w+)/i,
+      /subtipo[:\s]*(\w+)/i,
+      /subtipo\s+(\w+)\s*(?:\(|—|–|-)/i,
+    ];
+    let dominantSubtype: string | null = null;
+    for (const sp of subtypePatterns) {
+      const sm = fullText.match(sp);
+      if (sm) { dominantSubtype = sm[1]; break; }
+    }
+
+    // Extract wing
+    const wingPatterns = [
+      /[Aa]sa\s+(\d+)\s*\((\d+)w(\d+)\)/i,
+      /(\d+)w(\d+)/i,
+      /[Aa]sa\s+(\d+)/i,
+    ];
+    let wing: string | null = null;
+    for (const wp of wingPatterns) {
+      const wm = fullText.match(wp);
+      if (wm) {
+        if (wm[0].match(/\d+w\d+/)) {
+          wing = wm[0].match(/\d+w\d+/)![0];
+        } else {
+          wing = `Asa ${wm[1]}`;
+        }
+        break;
+      }
+    }
 
     const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
 
