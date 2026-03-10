@@ -49,7 +49,7 @@ export const REPORT_LEVEL_LABELS: Record<ReportLevel, string> = {
   completo: "Completo",
 };
 
-export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null, level: ReportLevel = "completo") => {
+export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null, level: ReportLevel = "completo", returnBlob = false): Blob | void => {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
