@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { generateEnneagramPDF, getPDFFileName, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoSrc from "@/assets/logo.png";
+import ResultPreviewModal from "@/components/admin/ResultPreviewModal";
 
 interface ReportRow {
   id: string;
