@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { UserPlus, Search, Eye, Trash2, FileText, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface Client {
   user_id: string;
@@ -18,30 +21,62 @@ const ClientesPage = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "" });
+
+  const fetchClients = async () => {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, phone, created_at")
+      .order("created_at", { ascending: false });
+
+    const { data: results } = await supabase
+      .from("enneagram_results")
+      .select("user_id");
+
+    const resultUserIds = new Set(results?.map((r) => r.user_id) || []);
+
+    setClients(
+      (profiles || []).map((p) => ({
+        ...p,
+        hasResult: resultUserIds.has(p.user_id),
+      }))
+    );
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchClients = async () => {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, phone, created_at")
-        .order("created_at", { ascending: false });
-
-      const { data: results } = await supabase
-        .from("enneagram_results")
-        .select("user_id");
-
-      const resultUserIds = new Set(results?.map((r) => r.user_id) || []);
-
-      setClients(
-        (profiles || []).map((p) => ({
-          ...p,
-          hasResult: resultUserIds.has(p.user_id),
-        }))
-      );
-      setLoading(false);
-    };
     fetchClients();
   }, []);
+
+  const handleCreate = async () => {
+    if (!form.name.trim() || !form.email.trim()) {
+      toast.error("Nome e e-mail são obrigatórios");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-client", {
+        body: { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() || null },
+      });
+
+      if (error || data?.error) {
+        toast.error(data?.error || error?.message || "Erro ao cadastrar cliente");
+        return;
+      }
+
+      toast.success("Cliente cadastrado com sucesso!");
+      setForm({ name: "", email: "", phone: "" });
+      setDialogOpen(false);
+      await fetchClients();
+    } catch {
+      toast.error("Erro ao cadastrar cliente");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase();
@@ -63,10 +98,59 @@ const ClientesPage = () => {
             Gerencie seus clientes e envie questionários
           </p>
         </div>
-        <Button className="gap-2 rounded-xl font-body">
-          <UserPlus className="w-4 h-4" />
-          Novo Cliente
-        </Button>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 rounded-xl font-body">
+              <UserPlus className="w-4 h-4" />
+              Novo Cliente
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Cadastrar Novo Cliente</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="font-body">Nome *</Label>
+                <Input
+                  id="name"
+                  placeholder="Nome completo"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="rounded-xl font-body"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="font-body">E-mail *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="email@exemplo.com"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="rounded-xl font-body"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="font-body">WhatsApp</Label>
+                <Input
+                  id="phone"
+                  placeholder="(11) 99999-9999"
+                  value={form.phone}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                  className="rounded-xl font-body"
+                />
+              </div>
+              <Button
+                onClick={handleCreate}
+                disabled={submitting}
+                className="w-full rounded-xl font-body"
+              >
+                {submitting ? "Cadastrando..." : "Cadastrar Cliente"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="bg-card/80 rounded-2xl border border-border/50 p-6">
