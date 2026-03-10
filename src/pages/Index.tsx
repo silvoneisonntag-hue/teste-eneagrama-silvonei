@@ -1,23 +1,67 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Circle, Sparkles, Brain } from "lucide-react";
+import { ArrowRight, Circle, Sparkles, Brain, LogOut, History, User } from "lucide-react";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import ChatInterface from "@/components/ChatInterface";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  if (showChat) {
+  const handleStartInterview = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setShowChat(true);
+  };
+
+  if (showChat && user) {
     return (
       <div className="min-h-screen bg-background">
-        <ChatInterface />
+        <ChatInterface onBack={() => setShowChat(false)} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navbar */}
+      <nav className="border-b border-border">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="font-heading text-xl font-semibold text-foreground">
+            Eneagrama
+          </Link>
+          <div className="flex items-center gap-3">
+            {loading ? null : user ? (
+              <>
+                <Link to="/history">
+                  <Button variant="ghost" size="sm" className="gap-2 font-body">
+                    <History className="w-4 h-4" />
+                    Histórico
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground font-body">
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="gap-2 rounded-xl font-body">
+                  <User className="w-4 h-4" />
+                  Entrar
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </nav>
+
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="container mx-auto px-6 py-20 lg:py-28">
@@ -42,7 +86,7 @@ const Index = () => {
               <Button
                 variant="hero"
                 size="lg"
-                onClick={() => setShowChat(true)}
+                onClick={handleStartInterview}
                 className="px-8 py-6 text-base rounded-xl gap-3"
               >
                 Começar Entrevista
