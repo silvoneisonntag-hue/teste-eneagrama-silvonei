@@ -49,7 +49,7 @@ export const REPORT_LEVEL_LABELS: Record<ReportLevel, string> = {
   completo: "Completo",
 };
 
-export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null, level: ReportLevel = "completo") => {
+export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null, level: ReportLevel = "completo", returnBlob = false): Blob | void => {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -338,5 +338,15 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   doc.setFillColor(...COLORS.gold);
   doc.rect(0, pageH - 4, pageW, 4, "F");
 
-  doc.save(`eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`);
+  const fileName = `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
+
+  if (returnBlob) {
+    return doc.output("blob");
+  }
+  doc.save(fileName);
+};
+
+export const getPDFFileName = (result: PDFResult) => {
+  const userName = result.profiles?.display_name || "Não informado";
+  return `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
 };

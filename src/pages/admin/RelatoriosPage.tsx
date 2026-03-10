@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Eye, Download, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { generateEnneagramPDF, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
+import { generateEnneagramPDF, getPDFFileName, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoSrc from "@/assets/logo.png";
 
@@ -42,6 +42,7 @@ const RelatoriosPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLevels, setSelectedLevels] = useState<Record<string, ReportLevel>>({});
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [sendingId, setSendingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,6 +129,81 @@ const RelatoriosPage = () => {
       toast.error("Erro ao gerar PDF");
     } finally {
       setGeneratingId(null);
+    }
+  };
+
+  const handleWhatsApp = async (row: ReportRow) => {
+    if (!row.phone) {
+      toast.error("Este cliente não possui telefone cadastrado.");
+      return;
+    }
+
+    const level = getLevel(row.id);
+    setSendingId(row.id);
+    toast.info("Gerando PDF e preparando envio...");
+
+    try {
+      const needsSkills = level !== "basico";
+      const [logoBase64, skills] = await Promise.all([
+        (async () => {
+          try {
+            const resp = await fetch(logoSrc);
+            const blob = await resp.blob();
+            return await new Promise<string>((res) => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          } catch { return undefined; }
+        })(),
+        needsSkills
+          ? (async () => {
+              try {
+                const { data, error } = await supabase.functions.invoke("enneagram-skills", {
+                  body: {
+                    type_1_name: row.type_1_name, type_1_pct: row.type_1_pct,
+                    type_2_name: row.type_2_name, type_2_pct: row.type_2_pct,
+                    type_3_name: row.type_3_name, type_3_pct: row.type_3_pct,
+                    wing: row.wing, dominant_subtype: row.dominant_subtype,
+                  },
+                });
+                if (error) throw error;
+                return data;
+              } catch { return null; }
+            })()
+          : Promise.resolve(null),
+      ]);
+
+      const blob = generateEnneagramPDF(row as any, logoBase64, skills, level, true) as Blob;
+      const fileName = getPDFFileName(row as any);
+
+      // Upload to storage
+      const filePath = `${row.id}/${fileName}`;
+      const { error: uploadError } = await supabase.storage
+        .from("reports")
+        .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("reports").getPublicUrl(filePath);
+      const publicUrl = urlData.publicUrl;
+
+      // Format phone for WhatsApp (remove non-digits, ensure country code)
+      let phone = row.phone.replace(/\D/g, "");
+      if (phone.startsWith("0")) phone = "55" + phone.slice(1);
+      if (!phone.startsWith("55")) phone = "55" + phone;
+
+      const message = encodeURIComponent(
+        `Olá ${row.display_name || ""}! 🌟\n\nSeu relatório de Eneagrama (${REPORT_LEVEL_LABELS[level]}) está pronto!\n\n📄 Acesse aqui: ${publicUrl}\n\nQualquer dúvida, estou à disposição!`
+      );
+
+      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+      toast.success("WhatsApp aberto com o link do relatório!");
+    } catch (err) {
+      console.error("WhatsApp send error:", err);
+      toast.error("Erro ao preparar envio por WhatsApp");
+    } finally {
+      setSendingId(null);
     }
   };
 
@@ -249,8 +325,19 @@ const RelatoriosPage = () => {
                               <Download className="w-4 h-4" />
                             )}
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:text-blue-300">
-                            <Send className="w-4 h-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-400 hover:text-blue-300"
+                            onClick={() => handleWhatsApp(row)}
+                            disabled={sendingId === row.id}
+                            title={row.phone ? "Enviar por WhatsApp" : "Sem telefone cadastrado"}
+                          >
+                            {sendingId === row.id ? (
+                              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </td>
