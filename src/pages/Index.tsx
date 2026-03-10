@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield } from "lucide-react";
+import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
 import silvoneiPhoto from "@/assets/silvonei.png";
@@ -128,6 +129,12 @@ const Index = () => {
                 para revelar seus padrões de personalidade, motivações e medos
                 mais profundos.
               </p>
+              <Alert className="mb-6 border-primary/30 bg-primary/5 max-w-md">
+                <Info className="w-4 h-4 text-primary" />
+                <AlertDescription className="text-muted-foreground font-body text-sm leading-relaxed">
+                  Para que o resultado seja mais preciso, é importante realizar a avaliação com atenção, em um momento sem interrupções, respondendo às perguntas com honestidade e fidelidade à sua própria experiência — não apenas ao que você gostaria de ser, mas ao que realmente costuma acontecer na sua vida.
+                </AlertDescription>
+              </Alert>
               <Button
                 variant="hero"
                 size="lg"
