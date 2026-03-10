@@ -12,6 +12,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -31,7 +32,7 @@ const Auth = () => {
         email,
         password,
         options: {
-          data: { display_name: displayName },
+          data: { display_name: displayName, phone },
           emailRedirectTo: window.location.origin,
         },
       });
@@ -75,6 +76,20 @@ const Auth = () => {
                 placeholder="Seu nome"
                 className="rounded-xl font-body"
                 required
+              />
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="font-body text-sm text-foreground">Telefone / WhatsApp</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(11) 99999-9999"
+                className="rounded-xl font-body"
               />
             </div>
           )}
