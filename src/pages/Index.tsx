@@ -369,9 +369,12 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/50 relative z-10">
-        <div className="container mx-auto px-6 text-center">
+        <div className="container mx-auto px-6 text-center space-y-2">
           <p className="text-muted-foreground font-body text-sm">
             Este teste é apenas indicativo e não substitui avaliação profissional.
+          </p>
+          <p className="text-muted-foreground/60 font-body text-xs">
+            © 2026 Todos os direitos reservados para Silvonei Sonntag Desenvolvimento Humano Ltda
           </p>
         </div>
       </footer>
