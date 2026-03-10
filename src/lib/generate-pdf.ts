@@ -270,34 +270,35 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
 
   addSeparator();
 
-  // === Detailed Results ===
-  addSectionTitle("PERFIL DETALHADO");
+  // === Detailed Results (intermediário + completo) ===
+  if (level === "intermediario" || level === "completo") {
+    addSectionTitle("PERFIL DETALHADO");
 
-  if (result.wing) addField("Asa:", result.wing);
-  if (result.dominant_subtype) addField("Subtipo:", result.dominant_subtype);
-  if (result.dominant_center) addField("Centro:", result.dominant_center);
-  if (result.tritype) addField("Tritipo:", result.tritype);
-  if (result.health_level) addField("Nível de Saúde:", `${result.health_level}/9`);
+    if (result.wing) addField("Asa:", result.wing);
+    if (result.dominant_subtype) addField("Subtipo:", result.dominant_subtype);
+    if (result.dominant_center) addField("Centro:", result.dominant_center);
+    if (result.tritype) addField("Tritipo:", result.tritype);
+    if (result.health_level) addField("Nível de Saúde:", `${result.health_level}/9`);
 
-  // Subtype percentages
-  if (result.subtype_preservation != null || result.subtype_social != null || result.subtype_sexual != null) {
-    y += 3;
-    addText("Distribuição de Subtipos:", 10, COLORS.mediumGray, true);
-    if (result.subtype_preservation != null) addField("  Autopreservação:", `${result.subtype_preservation}%`);
-    if (result.subtype_social != null) addField("  Social:", `${result.subtype_social}%`);
-    if (result.subtype_sexual != null) addField("  Sexual:", `${result.subtype_sexual}%`);
-  }
+    if (result.subtype_preservation != null || result.subtype_social != null || result.subtype_sexual != null) {
+      y += 3;
+      addText("Distribuição de Subtipos:", 10, COLORS.mediumGray, true);
+      if (result.subtype_preservation != null) addField("  Autopreservação:", `${result.subtype_preservation}%`);
+      if (result.subtype_social != null) addField("  Social:", `${result.subtype_social}%`);
+      if (result.subtype_sexual != null) addField("  Sexual:", `${result.subtype_sexual}%`);
+    }
 
-  addSeparator();
-
-  // === Skills ===
-  if (skills) {
-    drawSkills(skills);
     addSeparator();
+
+    // === Skills (intermediário + completo) ===
+    if (skills) {
+      drawSkills(skills);
+      addSeparator();
+    }
   }
 
-  // === Integration / Disintegration ===
-  if (result.integration_direction || result.disintegration_direction) {
+  // === Integration / Disintegration (completo only) ===
+  if (level === "completo" && (result.integration_direction || result.disintegration_direction)) {
     addSectionTitle("DIREÇÕES DE CRESCIMENTO");
     if (result.integration_direction) {
       addText("Direção de Integração (crescimento):", 10, COLORS.mediumGray, true);
@@ -311,8 +312,8 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
     addSeparator();
   }
 
-  // === Summary / Analysis ===
-  if (result.summary) {
+  // === Summary / Analysis (completo only) ===
+  if (level === "completo" && result.summary) {
     addSectionTitle("ANÁLISE COMPLETA");
     const cleanSummary = result.summary.replace(/[#*_`]/g, "");
     addText(cleanSummary, 10, COLORS.lightGray);
