@@ -76,6 +76,14 @@ const Index = () => {
           <div className="flex items-center gap-3">
             {loading ? null : user ? (
               <>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-primary">
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/history">
                   <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-primary">
                     <History className="w-4 h-4" />
