@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { generateEnneagramPDF, getPDFFileName, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoSrc from "@/assets/logo.png";
+import ResultPreviewModal from "@/components/admin/ResultPreviewModal";
 
 interface ReportRow {
   id: string;
@@ -43,6 +44,7 @@ const RelatoriosPage = () => {
   const [selectedLevels, setSelectedLevels] = useState<Record<string, ReportLevel>>({});
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [previewRow, setPreviewRow] = useState<ReportRow | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -309,7 +311,7 @@ const RelatoriosPage = () => {
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setPreviewRow(row)}>
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button
@@ -349,6 +351,12 @@ const RelatoriosPage = () => {
           </div>
         )}
       </div>
+
+      <ResultPreviewModal
+        result={previewRow}
+        open={!!previewRow}
+        onOpenChange={(open) => { if (!open) setPreviewRow(null); }}
+      />
     </div>
   );
 };
