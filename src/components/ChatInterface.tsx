@@ -141,7 +141,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
 
-    await supabase.from("enneagram_results").insert([{
+    const { data, error } = await supabase.from("enneagram_results").insert([{
       user_id: user.id,
       type_1_name: type1Name,
       type_1_pct: type1Pct,
@@ -152,9 +152,12 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       dominant_subtype: dominantSubtype,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
       summary: lastAssistantMsg?.content || null,
-    }]);
+    }]).select("id").single();
 
     setAutoSaved(true);
+    if (!error && data?.id && onResultSaved) {
+      onResultSaved(data.id);
+    }
   };
 
   const resetInterview = () => {
