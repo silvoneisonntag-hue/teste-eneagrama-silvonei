@@ -211,6 +211,36 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
             <StatItem label="Telefone" value={result.phone} />
           </>
         )}
+
+        <Separator />
+
+        {/* Generate PDF */}
+        <div className="flex items-center gap-3">
+          <Select value={level} onValueChange={(v) => setLevel(v as ReportLevel)}>
+            <SelectTrigger className="w-[160px] h-9 rounded-lg font-body text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(REPORT_LEVEL_LABELS) as ReportLevel[]).map((l) => (
+                <SelectItem key={l} value={l} className="font-body text-xs">
+                  {REPORT_LEVEL_LABELS[l]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={handleGeneratePDF}
+            disabled={generating}
+            className="gap-2 rounded-xl font-body flex-1"
+          >
+            {generating ? (
+              <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            Gerar PDF
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
