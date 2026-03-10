@@ -119,7 +119,15 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
   doc.setFillColor(...COLORS.gold);
   doc.rect(0, 0, pageW, 4, "F");
 
-  y = 35;
+  // Logo
+  if (logoBase64) {
+    const logoW = 40;
+    const logoH = 40;
+    doc.addImage(logoBase64, "PNG", pageW / 2 - logoW / 2, 10, logoW, logoH);
+    y = 55;
+  } else {
+    y = 35;
+  }
 
   // Title
   addCenteredText("RELATÓRIO DE ENEAGRAMA", 22, COLORS.gold);
