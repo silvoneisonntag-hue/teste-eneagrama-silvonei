@@ -351,6 +351,12 @@ const RelatoriosPage = () => {
           </div>
         )}
       </div>
+
+      <ResultPreviewModal
+        result={previewRow}
+        open={!!previewRow}
+        onOpenChange={(open) => { if (!open) setPreviewRow(null); }}
+      />
     </div>
   );
 };
