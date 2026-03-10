@@ -63,9 +63,6 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
   const [level, setLevel] = useState<ReportLevel>("basico");
   const [generating, setGenerating] = useState(false);
 
-  if (!result) return null;
-  if (!open) return null;
-
   const handleGeneratePDF = async () => {
     setGenerating(true);
     toast.info(`Gerando relatório ${REPORT_LEVEL_LABELS[level]}...`);
