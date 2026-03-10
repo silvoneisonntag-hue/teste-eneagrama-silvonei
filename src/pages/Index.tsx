@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin } from "lucide-react";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
-import silvoneiPhoto from "@/assets/silvonei.jpg";
+import silvoneiPhoto from "@/assets/silvonei.png";
 import ChatInterface from "@/components/ChatInterface";
 import { useAuth } from "@/contexts/AuthContext";
 
