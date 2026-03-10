@@ -60,7 +60,53 @@ const TypeBar = ({ name, pct, color }: { name: string; pct: number; color: strin
 );
 
 const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
+  const [level, setLevel] = useState<ReportLevel>("basico");
+  const [generating, setGenerating] = useState(false);
+
   if (!result) return null;
+
+  const handleGeneratePDF = async () => {
+    setGenerating(true);
+    toast.info(`Gerando relatório ${REPORT_LEVEL_LABELS[level]}...`);
+    try {
+      const needsSkills = level !== "basico";
+      const [logoBase64, skills] = await Promise.all([
+        (async () => {
+          try {
+            const resp = await fetch(logoSrc);
+            const blob = await resp.blob();
+            return await new Promise<string>((res) => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          } catch { return undefined; }
+        })(),
+        needsSkills
+          ? (async () => {
+              try {
+                const { data, error } = await supabase.functions.invoke("enneagram-skills", {
+                  body: {
+                    type_1_name: result.type_1_name, type_1_pct: result.type_1_pct,
+                    type_2_name: result.type_2_name, type_2_pct: result.type_2_pct,
+                    type_3_name: result.type_3_name, type_3_pct: result.type_3_pct,
+                    wing: result.wing, dominant_subtype: result.dominant_subtype,
+                  },
+                });
+                if (error) throw error;
+                return data;
+              } catch { return null; }
+            })()
+          : Promise.resolve(null),
+      ]);
+      generateEnneagramPDF({ ...result, profiles: { display_name: result.display_name, phone: result.phone } } as any, logoBase64, skills, level);
+      toast.success("PDF gerado!");
+    } catch {
+      toast.error("Erro ao gerar PDF");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", {
