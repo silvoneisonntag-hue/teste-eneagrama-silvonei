@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin } from "lucide-react";
+import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield } from "lucide-react";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
 import silvoneiPhoto from "@/assets/silvonei.png";
 import ChatInterface from "@/components/ChatInterface";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const enneagramTypes = [
   { num: 1, name: "O Perfeccionista", desc: "Busca a perfeição, é ético e tem forte senso de certo e errado." },
@@ -23,8 +24,20 @@ const enneagramTypes = [
 
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => setIsAdmin(!!data));
+  }, [user]);
 
   const handleStartInterview = () => {
     if (!user) {
@@ -63,6 +76,14 @@ const Index = () => {
           <div className="flex items-center gap-3">
             {loading ? null : user ? (
               <>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-primary">
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/history">
                   <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-primary">
                     <History className="w-4 h-4" />
