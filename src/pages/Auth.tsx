@@ -80,6 +80,20 @@ const Auth = () => {
             </div>
           )}
 
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="font-body text-sm text-foreground">Telefone / WhatsApp</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(11) 99999-9999"
+                className="rounded-xl font-body"
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email" className="font-body text-sm text-foreground">Email</Label>
             <Input
