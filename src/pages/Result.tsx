@@ -270,9 +270,6 @@ const Result = () => {
             <Button variant="outline" size="sm" onClick={shareLinkedIn} className="rounded-xl font-body border-primary/30 text-primary hover:bg-primary/10 gap-2">
               LinkedIn
             </Button>
-            <Button variant="outline" size="sm" onClick={copyLink} className="rounded-xl font-body border-primary/30 text-primary hover:bg-primary/10 gap-2">
-              Copiar texto
-            </Button>
           </div>
         </motion.div>
 
