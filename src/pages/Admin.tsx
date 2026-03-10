@@ -182,12 +182,19 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-10 max-w-5xl">
         <div className="flex items-center gap-3 mb-8">
+          <Link to="/">
+            <Button variant="ghost" size="icon" className="rounded-xl">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
           <Shield className="w-6 h-6 text-primary" />
           <h1 className="font-heading text-3xl font-bold text-foreground">Painel Admin</h1>
           <span className="ml-auto text-muted-foreground font-body text-sm">
             {results.length} resultado(s)
           </span>
         </div>
+
+        <AdminStats />
 
         {results.length === 0 ? (
           <p className="text-muted-foreground font-body text-center py-20">Nenhum resultado ainda.</p>
