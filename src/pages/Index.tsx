@@ -129,9 +129,9 @@ const Index = () => {
                 para revelar seus padrões de personalidade, motivações e medos
                 mais profundos.
               </p>
-              <Alert className="mb-6 border-primary/30 bg-primary/5 max-w-md">
-                <Info className="w-4 h-4 text-primary" />
-                <AlertDescription className="text-muted-foreground font-body text-sm leading-relaxed">
+              <Alert className="mb-6 border-primary bg-primary/15 max-w-md shadow-[0_0_20px_hsl(43_80%_55%_/_0.15)]">
+                <Info className="w-4 h-4 text-primary !mt-0" />
+                <AlertDescription className="text-foreground/90 font-body text-sm leading-relaxed font-medium">
                   Para que o resultado seja mais preciso, é importante realizar a avaliação com atenção, em um momento sem interrupções, respondendo às perguntas com honestidade e fidelidade à sua própria experiência — não apenas ao que você gostaria de ser, mas ao que realmente costuma acontecer na sua vida.
                 </AlertDescription>
               </Alert>
