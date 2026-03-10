@@ -325,8 +325,19 @@ const RelatoriosPage = () => {
                               <Download className="w-4 h-4" />
                             )}
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:text-blue-300">
-                            <Send className="w-4 h-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-400 hover:text-blue-300"
+                            onClick={() => handleWhatsApp(row)}
+                            disabled={sendingId === row.id}
+                            title={row.phone ? "Enviar por WhatsApp" : "Sem telefone cadastrado"}
+                          >
+                            {sendingId === row.id ? (
+                              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </td>
