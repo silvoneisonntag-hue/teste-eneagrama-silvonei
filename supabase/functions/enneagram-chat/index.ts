@@ -69,7 +69,14 @@ Depois do resultado, explique:
 - padrões de comportamento comuns
 
 SUBTIPO INSTINTIVO:
-Apresente a distribuição estimada dos subtipos (Social, Preservação, Sexual).
+Apresente a distribuição estimada dos subtipos neste formato:
+- Subtipo predominante: [Social/Preservação/Sexual]
+- Preservação: XX%
+- Social: XX%
+- Sexual: XX%
+
+ASA:
+Indique a asa identificada no formato: Asa X (exemplo: Asa 3).
 
 Sempre informe que o resultado é apenas indicativo e não substitui avaliação profissional.
 
