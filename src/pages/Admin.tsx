@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Download, Shield, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import jsPDF from "jspdf";
+import { generateEnneagramPDF } from "@/lib/generate-pdf";
 import AdminStats from "@/components/AdminStats";
 
 interface ResultWithProfile {
@@ -70,7 +70,7 @@ const Admin = () => {
       const userIds = [...new Set(resultsData.map(r => r.user_id))];
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name")
+        .select("user_id, display_name, phone")
         .in("user_id", userIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
@@ -88,80 +88,8 @@ const Admin = () => {
     return profile?.display_name || userId.slice(0, 8);
   };
 
-  const generatePDF = async (result: ResultWithProfile) => {
-    const doc = new jsPDF();
-    const margin = 20;
-    let y = margin;
-
-    const addText = (text: string, size: number = 11, bold: boolean = false) => {
-      doc.setFontSize(size);
-      if (bold) doc.setFont("helvetica", "bold");
-      else doc.setFont("helvetica", "normal");
-
-      const lines = doc.splitTextToSize(text, 170);
-      for (const line of lines) {
-        if (y > 270) { doc.addPage(); y = margin; }
-        doc.text(line, margin, y);
-        y += size * 0.5;
-      }
-      y += 3;
-    };
-
-    const addSeparator = () => {
-      if (y > 270) { doc.addPage(); y = margin; }
-      doc.setDrawColor(180, 160, 120);
-      doc.line(margin, y, 190, y);
-      y += 8;
-    };
-
-    // Header
-    addText("RELATÓRIO DE ENEAGRAMA", 18, true);
-    addText(`Data: ${new Date(result.created_at).toLocaleDateString("pt-BR")}`, 10);
-    y += 5;
-    addSeparator();
-
-    // User data
-    addText("DADOS DO USUÁRIO", 13, true);
-    const userName = result.profiles?.display_name || "Não informado";
-    addText(`Nome: ${userName}`);
-    addText(`ID: ${result.user_id}`);
-    y += 3;
-    addSeparator();
-
-    // Results
-    addText("RESULTADO", 13, true);
-    addText(`Tipo Principal: ${result.type_1_name} (${result.type_1_pct}%)`, 12, true);
-    if (result.type_2_name) addText(`2º Tipo: ${result.type_2_name} (${result.type_2_pct}%)`);
-    if (result.type_3_name) addText(`3º Tipo: ${result.type_3_name} (${result.type_3_pct}%)`);
-    if (result.dominant_subtype) addText(`Subtipo Dominante: ${result.dominant_subtype}`);
-    if (result.wing) addText(`Asa: ${result.wing}`);
-    if (result.health_level) addText(`Nível de Saúde: ${result.health_level}`);
-    if (result.dominant_center) addText(`Centro Dominante: ${result.dominant_center}`);
-    if (result.tritype) addText(`Tritipo: ${result.tritype}`);
-    y += 3;
-    addSeparator();
-
-    // Summary
-    if (result.summary) {
-      addText("ANÁLISE / RESUMO", 13, true);
-      addText(result.summary.replace(/[#*_`]/g, ""));
-      y += 3;
-      addSeparator();
-    }
-
-    // Conversation
-    if (result.conversation && Array.isArray(result.conversation)) {
-      addText("CONVERSA COMPLETA", 13, true);
-      y += 3;
-      for (const msg of result.conversation) {
-        const role = msg.role === "user" ? "Usuário" : "IA";
-        addText(`${role}:`, 10, true);
-        addText(msg.content?.replace(/[#*_`]/g, "") || "", 10);
-        y += 2;
-      }
-    }
-
-    doc.save(`eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`);
+  const handleGeneratePDF = (result: ResultWithProfile) => {
+    generateEnneagramPDF(result);
     toast.success("PDF gerado com sucesso!");
   };
 
@@ -234,7 +162,7 @@ const Admin = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => generatePDF(result)}
+                      onClick={() => handleGeneratePDF(result)}
                       className="gap-2 border-primary/30 text-primary hover:bg-primary/10 rounded-xl font-body"
                     >
                       <Download className="w-4 h-4" />
