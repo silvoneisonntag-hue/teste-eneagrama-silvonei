@@ -86,6 +86,41 @@ const ClientesPage = () => {
     );
   });
 
+  const handleDelete = async (client: Client) => {
+    if (!confirm(`Tem certeza que deseja excluir "${client.display_name || "Sem nome"}"?`)) return;
+    try {
+      // Delete related results and feedback first
+      const { data: resultIds } = await supabase
+        .from("enneagram_results")
+        .select("id")
+        .eq("user_id", client.user_id);
+
+      if (resultIds && resultIds.length > 0) {
+        await supabase
+          .from("enneagram_feedback")
+          .delete()
+          .in("result_id", resultIds.map(r => r.id));
+
+        await supabase
+          .from("enneagram_results")
+          .delete()
+          .eq("user_id", client.user_id);
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("user_id", client.user_id);
+
+      if (error) throw error;
+      toast.success("Cliente excluído com sucesso!");
+      setClients((prev) => prev.filter((c) => c.user_id !== client.user_id));
+    } catch (e: any) {
+      console.error("Delete error:", e);
+      toast.error("Erro ao excluir cliente");
+    }
+  };
+
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
