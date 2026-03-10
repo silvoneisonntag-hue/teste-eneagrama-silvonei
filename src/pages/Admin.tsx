@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Download, Shield, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
+import AdminStats from "@/components/AdminStats";
 
 interface ResultWithProfile {
   id: string;
