@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin } from "lucide-react";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
+import silvoneiPhoto from "@/assets/silvonei.jpg";
 import ChatInterface from "@/components/ChatInterface";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -242,6 +243,11 @@ const Index = () => {
             className="max-w-3xl mx-auto bg-card/80 backdrop-blur-sm rounded-3xl border border-border/50 p-8 lg:p-10 shadow-[var(--shadow-card)]"
           >
             <div className="text-center">
+              <img
+                src={silvoneiPhoto}
+                alt="Silvonei Sonntag - Instrutor de Eneagrama"
+                className="w-36 h-36 rounded-full object-cover object-top mx-auto mb-6 border-2 border-primary/30 shadow-lg"
+              />
               <p className="text-primary font-body font-semibold text-sm tracking-[0.3em] uppercase mb-3">
                 ✦ Sobre o instrutor
               </p>
