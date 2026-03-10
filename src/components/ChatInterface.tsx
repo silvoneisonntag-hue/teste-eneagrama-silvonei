@@ -218,14 +218,20 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
   };
 
-  // Check if the interview seems finished (assistant mentioned "Tipo mais provável" or similar)
+  // Check if the interview seems finished - require enough messages AND final result indicators
   const lastMsg = messages[messages.length - 1];
+  const hasEnoughMessages = messages.filter(m => m.role === "user").length >= 10;
   const interviewDone =
     !isLoading &&
+    hasEnoughMessages &&
     lastMsg?.role === "assistant" &&
-    (lastMsg.content.includes("Tipo mais provável") ||
-      lastMsg.content.includes("tipo mais provável") ||
-      lastMsg.content.includes("avaliação profissional"));
+    (
+      // Must contain percentage-like result indicators
+      (/Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.toLowerCase().includes("tipo mais provável")) ||
+      // Or explicit final analysis markers with percentages somewhere in conversation
+      (lastMsg.content.toLowerCase().includes("análise final") && /\d+%/.test(lastMsg.content)) ||
+      (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content))
+    );
 
   // Auto-save when interview is done
   useEffect(() => {
