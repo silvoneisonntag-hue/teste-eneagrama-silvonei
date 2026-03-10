@@ -162,7 +162,7 @@ const Admin = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => generatePDF(result)}
+                      onClick={() => handleGeneratePDF(result)}
                       className="gap-2 border-primary/30 text-primary hover:bg-primary/10 rounded-xl font-body"
                     >
                       <Download className="w-4 h-4" />
