@@ -160,7 +160,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     setMessages([]);
     setStarted(false);
     setInput("");
-    setSaved(false);
+    setAutoSaved(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
