@@ -46,18 +46,10 @@ const Index = () => {
           </Link>
           <div className="flex items-center gap-3">
             {loading ? null : user ? (
-              <>
-                <Link to="/history">
-                  <Button variant="ghost" size="sm" className="gap-2 font-body text-foreground/70 hover:text-primary">
-                    <History className="w-4 h-4" />
-                    Histórico
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground font-body hover:text-primary">
-                  <LogOut className="w-4 h-4" />
-                  Sair
-                </Button>
-              </>
+              <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground font-body hover:text-primary">
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
             ) : (
               <Link to="/auth">
                 <Button variant="outline" size="sm" className="gap-2 rounded-xl font-body border-primary/30 text-primary hover:bg-primary/10">
