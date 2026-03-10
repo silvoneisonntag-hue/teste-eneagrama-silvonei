@@ -8,6 +8,7 @@ import logo from "@/assets/logo.png";
 import silvoneiPhoto from "@/assets/silvonei.png";
 import ChatInterface from "@/components/ChatInterface";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const enneagramTypes = [
   { num: 1, name: "O Perfeccionista", desc: "Busca a perfeição, é ético e tem forte senso de certo e errado." },
