@@ -233,7 +233,8 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   }
 
   // Title
-  addCenteredText("RELATÓRIO DE ENEAGRAMA", 22, COLORS.gold);
+  const levelLabel = REPORT_LEVEL_LABELS[level].toUpperCase();
+  addCenteredText(`RELATÓRIO ${levelLabel} DE ENEAGRAMA`, 22, COLORS.gold);
   y += 2;
   addCenteredText("Análise Personalizada de Personalidade", 11, COLORS.mediumGray, false);
   y += 8;
