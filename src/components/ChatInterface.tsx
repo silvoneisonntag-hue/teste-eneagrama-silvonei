@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 interface ChatInterfaceProps {
   onBack?: () => void;
+  onResultSaved?: (resultId: string) => void;
 }
 
 const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
