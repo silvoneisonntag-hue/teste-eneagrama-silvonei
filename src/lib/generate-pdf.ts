@@ -23,6 +23,11 @@ interface PDFResult {
   profiles: { display_name: string | null; phone?: string | null } | null;
 }
 
+interface SkillsData {
+  habilidades_naturais: string[];
+  habilidades_desenvolver: string[];
+}
+
 // Color palette matching the app theme
 const COLORS = {
   darkPurple: [18, 10, 31] as [number, number, number],
@@ -31,17 +36,21 @@ const COLORS = {
   white: [255, 255, 255] as [number, number, number],
   lightGray: [200, 200, 210] as [number, number, number],
   mediumGray: [140, 130, 150] as [number, number, number],
+  green: [72, 199, 142] as [number, number, number],
+  orange: [255, 159, 67] as [number, number, number],
+  blue: [100, 149, 237] as [number, number, number],
 };
 
-export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => {
+export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null) => {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
   const margin = 22;
   const contentW = pageW - margin * 2;
   let y = 0;
 
   const checkPage = (needed: number = 20) => {
-    if (y > 270 - needed) {
+    if (y > pageH - 30 - needed) {
       doc.addPage();
       y = margin;
       addPageBg();
@@ -50,7 +59,7 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
 
   const addPageBg = () => {
     doc.setFillColor(...COLORS.darkPurple);
-    doc.rect(0, 0, pageW, doc.internal.pageSize.getHeight(), "F");
+    doc.rect(0, 0, pageW, pageH, "F");
   };
 
   const addText = (text: string, size: number = 10, color: [number, number, number] = COLORS.lightGray, bold = false, maxWidth = contentW) => {
@@ -77,7 +86,6 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
   const addSectionTitle = (title: string) => {
     checkPage(15);
     y += 4;
-    // Gold accent line
     doc.setDrawColor(...COLORS.gold);
     doc.setLineWidth(0.8);
     doc.line(margin, y, margin + 30, y);
@@ -107,6 +115,93 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
     doc.setTextColor(...COLORS.white);
     doc.text(value, margin + 50, y);
     y += 6;
+  };
+
+  // === Draw horizontal bar chart for types ===
+  const drawTypesChart = () => {
+    checkPage(60);
+    addSectionTitle("GRÁFICO DE TIPOS PROVÁVEIS");
+
+    const types: { name: string; pct: number; color: [number, number, number] }[] = [];
+    types.push({ name: result.type_1_name, pct: result.type_1_pct, color: COLORS.gold });
+    if (result.type_2_name && result.type_2_pct) {
+      types.push({ name: result.type_2_name, pct: result.type_2_pct, color: COLORS.blue });
+    }
+    if (result.type_3_name && result.type_3_pct) {
+      types.push({ name: result.type_3_name, pct: result.type_3_pct, color: COLORS.green });
+    }
+
+    const barH = 12;
+    const barGap = 6;
+    const labelW = 55;
+    const maxBarW = contentW - labelW - 25;
+
+    for (const t of types) {
+      checkPage(barH + barGap);
+
+      // Label
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.white);
+      doc.text(t.name, margin, y + barH / 2 + 1);
+
+      // Background bar
+      const barX = margin + labelW;
+      doc.setFillColor(40, 30, 55);
+      doc.roundedRect(barX, y - 2, maxBarW, barH, 3, 3, "F");
+
+      // Value bar
+      const barW = (t.pct / 100) * maxBarW;
+      doc.setFillColor(...t.color);
+      doc.roundedRect(barX, y - 2, barW, barH, 3, 3, "F");
+
+      // Percentage text
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.white);
+      doc.text(`${t.pct}%`, barX + maxBarW + 3, y + barH / 2 + 1);
+
+      y += barH + barGap;
+    }
+    y += 4;
+  };
+
+  // === Draw skills sections ===
+  const drawSkills = (skillsData: SkillsData) => {
+    // Natural skills
+    checkPage(30);
+    addSectionTitle("HABILIDADES NATURAIS");
+    
+    for (const skill of skillsData.habilidades_naturais) {
+      checkPage(8);
+      doc.setFillColor(...COLORS.green);
+      doc.circle(margin + 3, y - 1.5, 1.5, "F");
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...COLORS.white);
+      doc.text(skill, margin + 8, y);
+      y += 7;
+    }
+
+    y += 4;
+    addSeparator();
+
+    // Skills to develop
+    checkPage(30);
+    addSectionTitle("HABILIDADES A DESENVOLVER");
+    
+    for (const skill of skillsData.habilidades_desenvolver) {
+      checkPage(8);
+      doc.setFillColor(...COLORS.orange);
+      doc.circle(margin + 3, y - 1.5, 1.5, "F");
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...COLORS.white);
+      doc.text(skill, margin + 8, y);
+      y += 7;
+    }
+
+    y += 4;
   };
 
   const userName = result.profiles?.display_name || "Não informado";
@@ -161,6 +256,11 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
 
   addSeparator();
 
+  // === Types Chart ===
+  drawTypesChart();
+
+  addSeparator();
+
   // === Detailed Results ===
   addSectionTitle("PERFIL DETALHADO");
 
@@ -181,6 +281,12 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
 
   addSeparator();
 
+  // === Skills ===
+  if (skills) {
+    drawSkills(skills);
+    addSeparator();
+  }
+
   // === Integration / Disintegration ===
   if (result.integration_direction || result.disintegration_direction) {
     addSectionTitle("DIREÇÕES DE CRESCIMENTO");
@@ -199,7 +305,6 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
   // === Summary / Analysis ===
   if (result.summary) {
     addSectionTitle("ANÁLISE COMPLETA");
-    // Clean markdown formatting
     const cleanSummary = result.summary.replace(/[#*_`]/g, "");
     addText(cleanSummary, 10, COLORS.lightGray);
     addSeparator();
@@ -221,7 +326,7 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => 
 
   // Bottom gold bar
   doc.setFillColor(...COLORS.gold);
-  doc.rect(0, doc.internal.pageSize.getHeight() - 4, pageW, 4, "F");
+  doc.rect(0, pageH - 4, pageW, 4, "F");
 
   doc.save(`eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`);
 };
