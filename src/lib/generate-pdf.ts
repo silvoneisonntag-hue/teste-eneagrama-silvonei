@@ -41,7 +41,15 @@ const COLORS = {
   blue: [100, 149, 237] as [number, number, number],
 };
 
-export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null) => {
+export type ReportLevel = "basico" | "intermediario" | "completo";
+
+export const REPORT_LEVEL_LABELS: Record<ReportLevel, string> = {
+  basico: "Básico",
+  intermediario: "Intermediário",
+  completo: "Completo",
+};
+
+export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null, level: ReportLevel = "completo") => {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
