@@ -41,7 +41,15 @@ const COLORS = {
   blue: [100, 149, 237] as [number, number, number],
 };
 
-export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null) => {
+export type ReportLevel = "basico" | "intermediario" | "completo";
+
+export const REPORT_LEVEL_LABELS: Record<ReportLevel, string> = {
+  basico: "Básico",
+  intermediario: "Intermediário",
+  completo: "Completo",
+};
+
+export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, skills?: SkillsData | null, level: ReportLevel = "completo") => {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -225,7 +233,8 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
   }
 
   // Title
-  addCenteredText("RELATÓRIO DE ENEAGRAMA", 22, COLORS.gold);
+  const levelLabel = REPORT_LEVEL_LABELS[level].toUpperCase();
+  addCenteredText(`RELATÓRIO ${levelLabel} DE ENEAGRAMA`, 22, COLORS.gold);
   y += 2;
   addCenteredText("Análise Personalizada de Personalidade", 11, COLORS.mediumGray, false);
   y += 8;
@@ -261,34 +270,35 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
 
   addSeparator();
 
-  // === Detailed Results ===
-  addSectionTitle("PERFIL DETALHADO");
+  // === Detailed Results (intermediário + completo) ===
+  if (level === "intermediario" || level === "completo") {
+    addSectionTitle("PERFIL DETALHADO");
 
-  if (result.wing) addField("Asa:", result.wing);
-  if (result.dominant_subtype) addField("Subtipo:", result.dominant_subtype);
-  if (result.dominant_center) addField("Centro:", result.dominant_center);
-  if (result.tritype) addField("Tritipo:", result.tritype);
-  if (result.health_level) addField("Nível de Saúde:", `${result.health_level}/9`);
+    if (result.wing) addField("Asa:", result.wing);
+    if (result.dominant_subtype) addField("Subtipo:", result.dominant_subtype);
+    if (result.dominant_center) addField("Centro:", result.dominant_center);
+    if (result.tritype) addField("Tritipo:", result.tritype);
+    if (result.health_level) addField("Nível de Saúde:", `${result.health_level}/9`);
 
-  // Subtype percentages
-  if (result.subtype_preservation != null || result.subtype_social != null || result.subtype_sexual != null) {
-    y += 3;
-    addText("Distribuição de Subtipos:", 10, COLORS.mediumGray, true);
-    if (result.subtype_preservation != null) addField("  Autopreservação:", `${result.subtype_preservation}%`);
-    if (result.subtype_social != null) addField("  Social:", `${result.subtype_social}%`);
-    if (result.subtype_sexual != null) addField("  Sexual:", `${result.subtype_sexual}%`);
-  }
+    if (result.subtype_preservation != null || result.subtype_social != null || result.subtype_sexual != null) {
+      y += 3;
+      addText("Distribuição de Subtipos:", 10, COLORS.mediumGray, true);
+      if (result.subtype_preservation != null) addField("  Autopreservação:", `${result.subtype_preservation}%`);
+      if (result.subtype_social != null) addField("  Social:", `${result.subtype_social}%`);
+      if (result.subtype_sexual != null) addField("  Sexual:", `${result.subtype_sexual}%`);
+    }
 
-  addSeparator();
-
-  // === Skills ===
-  if (skills) {
-    drawSkills(skills);
     addSeparator();
+
+    // === Skills (intermediário + completo) ===
+    if (skills) {
+      drawSkills(skills);
+      addSeparator();
+    }
   }
 
-  // === Integration / Disintegration ===
-  if (result.integration_direction || result.disintegration_direction) {
+  // === Integration / Disintegration (completo only) ===
+  if (level === "completo" && (result.integration_direction || result.disintegration_direction)) {
     addSectionTitle("DIREÇÕES DE CRESCIMENTO");
     if (result.integration_direction) {
       addText("Direção de Integração (crescimento):", 10, COLORS.mediumGray, true);
@@ -302,8 +312,8 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
     addSeparator();
   }
 
-  // === Summary / Analysis ===
-  if (result.summary) {
+  // === Summary / Analysis (completo only) ===
+  if (level === "completo" && result.summary) {
     addSectionTitle("ANÁLISE COMPLETA");
     const cleanSummary = result.summary.replace(/[#*_`]/g, "");
     addText(cleanSummary, 10, COLORS.lightGray);

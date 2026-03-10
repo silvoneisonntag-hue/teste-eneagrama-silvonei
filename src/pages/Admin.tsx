@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Download, Shield, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { generateEnneagramPDF } from "@/lib/generate-pdf";
+import { generateEnneagramPDF, ReportLevel } from "@/lib/generate-pdf";
 import AdminStats from "@/components/AdminStats";
 import logoSrc from "@/assets/logo.png";
 
