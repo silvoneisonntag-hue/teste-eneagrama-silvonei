@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import type { Json } from "@/integrations/supabase/types";
 import { Send, RotateCcw, Save, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
