@@ -14,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
+  const [acceptedLgpd, setAcceptedLgpd] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
