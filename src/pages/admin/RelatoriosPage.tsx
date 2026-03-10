@@ -125,7 +125,8 @@ const RelatoriosPage = () => {
             })()
           : Promise.resolve(null),
       ]);
-      generateEnneagramPDF(row as any, logoBase64, skills, level);
+      const pdfResult = { ...row, profiles: { display_name: row.display_name, phone: row.phone } };
+      generateEnneagramPDF(pdfResult as any, logoBase64, skills, level);
       toast.success("PDF gerado!");
     } catch {
       toast.error("Erro ao gerar PDF");
