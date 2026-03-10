@@ -114,11 +114,22 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     // Multiple regex patterns to handle different AI output formats
     const patterns = [
+      // "Tipo 4 — O Individualista (65%)"
       /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
+      // "Tipo 4 — O Individualista: 65%"
       /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*[:—–\-]\s*(\d+)%/gi,
+      // "**Tipo 4 — O Individualista** (65%)"
       /\*{0,2}Tipo\s+(\d+)\s*[—–\-:]\s*([^*(\n]+?)\*{0,2}\s*\((\d+)%\)/gi,
+      // "1º tipo: Tipo 4 — O Individualista (65%)"
       /(\d+)[º°]?\s*(?:tipo|lugar|posição)[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
+      // "Tipo 4 (O Individualista) — 65%"
       /Tipo\s+(\d+)\s*\(([^)]+)\)\s*[—–\-:]\s*(\d+)%/gi,
+      // "Tipo 4 com Asa 3 (4w3) — 65%" or "Tipo 4 com Asa 3: 65%"
+      /Tipo\s+(\d+)\s+com\s+[Aa]sa\s+\d+[^—–\-:\n]*?[—–\-:]\s*(\d+)%/gi,
+      // "Tipo mais provável: 4" with percentage nearby
+      /Tipo\s+mais\s+prov[áa]vel[:\s]*(\d+)\s*[—–\-]?\s*([^(\n]*?)\s*\(?(\d+)%\)?/gi,
+      // "Tipo 4: 65%" simple format
+      /Tipo\s+(\d+)\s*:\s*(\d+)%/gi,
     ];
 
     let allMatches: { num: string; name: string; pct: number }[] = [];
@@ -127,10 +138,15 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       const matches = [...fullText.matchAll(pattern)];
       if (matches.length > 0) {
         for (const m of matches) {
-          // Handle different capture group arrangements
-          if (m.length === 5) {
+          if (pattern === patterns[3] && m.length === 5) {
             // Pattern with ordinal: group 2=num, 3=name, 4=pct
             allMatches.push({ num: m[2], name: m[3].trim(), pct: parseInt(m[4]) });
+          } else if (pattern === patterns[5]) {
+            // "Tipo N com Asa X: pct%" — only 2 capture groups
+            allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
+          } else if (pattern === patterns[7]) {
+            // "Tipo N: pct%" — only 2 capture groups
+            allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
           } else {
             allMatches.push({ num: m[1], name: m[2].trim(), pct: parseInt(m[3]) });
           }
@@ -141,12 +157,29 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     // Fallback: look for any "X%" near "Tipo N" mentions
     if (allMatches.length === 0) {
-      const loosePct = /Tipo\s+(\d+)[^%\n]{0,60}?(\d{1,3})%/gi;
+      const loosePct = /Tipo\s+(\d+)[^%\n]{0,80}?(\d{1,3})%/gi;
       const looseMatches = [...fullText.matchAll(loosePct)];
       for (const m of looseMatches) {
         const pct = parseInt(m[2]);
         if (pct > 0 && pct <= 100) {
           allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct });
+        }
+      }
+    }
+
+    // Last resort: look for "N%" patterns in final message context
+    if (allMatches.length === 0) {
+      const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+      if (lastAssistant) {
+        const tipoNumPattern = /Tipo\s+(\d+)/gi;
+        const tipoNums = [...lastAssistant.content.matchAll(tipoNumPattern)];
+        const uniqueNums = [...new Set(tipoNums.map(m => m[1]))];
+        if (uniqueNums.length > 0) {
+          // Assign descending percentages based on mention order
+          uniqueNums.forEach((num, i) => {
+            const estimatedPct = Math.max(80 - i * 20, 10);
+            allMatches.push({ num, name: `Tipo ${num}`, pct: estimatedPct });
+          });
         }
       }
     }
