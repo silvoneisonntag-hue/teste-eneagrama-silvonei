@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
+  const [acceptedLgpd, setAcceptedLgpd] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -128,7 +130,25 @@ const Auth = () => {
             />
           </div>
 
-          <Button variant="hero" type="submit" disabled={loading} className="w-full rounded-xl py-6">
+          {!isLogin && (
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="lgpd"
+                checked={acceptedLgpd}
+                onCheckedChange={(checked) => setAcceptedLgpd(checked === true)}
+                className="mt-0.5"
+              />
+              <label htmlFor="lgpd" className="text-xs text-muted-foreground font-body leading-relaxed cursor-pointer">
+                Li e concordo com a{" "}
+                <Link to="/privacidade" className="text-primary hover:underline font-medium">
+                  Política de Privacidade
+                </Link>{" "}
+                e autorizo o tratamento dos meus dados pessoais conforme a LGPD.
+              </label>
+            </div>
+          )}
+
+          <Button variant="hero" type="submit" disabled={loading || (!isLogin && !acceptedLgpd)} className="w-full rounded-xl py-6">
             {loading ? "Carregando..." : isLogin ? "Entrar" : "Criar Conta"}
           </Button>
 
