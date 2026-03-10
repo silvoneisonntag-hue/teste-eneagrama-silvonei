@@ -33,7 +33,7 @@ const COLORS = {
   mediumGray: [140, 130, 150] as [number, number, number],
 };
 
-export const generateEnneagramPDF = (result: PDFResult) => {
+export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string) => {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 22;
