@@ -179,6 +179,13 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       lastMsg.content.includes("tipo mais provável") ||
       lastMsg.content.includes("avaliação profissional"));
 
+  // Auto-save when interview is done
+  useEffect(() => {
+    if (interviewDone && !autoSaved) {
+      autoSaveResults();
+    }
+  }, [interviewDone, autoSaved]);
+
   if (!started) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 px-4">
