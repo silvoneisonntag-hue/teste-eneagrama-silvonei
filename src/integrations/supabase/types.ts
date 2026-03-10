@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      enneagram_results: {
+        Row: {
+          conversation: Json
+          created_at: string
+          dominant_subtype: string | null
+          id: string
+          subtype_preservation: number | null
+          subtype_sexual: number | null
+          subtype_social: number | null
+          summary: string | null
+          type_1_name: string
+          type_1_pct: number
+          type_2_name: string | null
+          type_2_pct: number | null
+          type_3_name: string | null
+          type_3_pct: number | null
+          user_id: string
+        }
+        Insert: {
+          conversation?: Json
+          created_at?: string
+          dominant_subtype?: string | null
+          id?: string
+          subtype_preservation?: number | null
+          subtype_sexual?: number | null
+          subtype_social?: number | null
+          summary?: string | null
+          type_1_name: string
+          type_1_pct: number
+          type_2_name?: string | null
+          type_2_pct?: number | null
+          type_3_name?: string | null
+          type_3_pct?: number | null
+          user_id: string
+        }
+        Update: {
+          conversation?: Json
+          created_at?: string
+          dominant_subtype?: string | null
+          id?: string
+          subtype_preservation?: number | null
+          subtype_sexual?: number | null
+          subtype_social?: number | null
+          summary?: string | null
+          type_1_name?: string
+          type_1_pct?: number
+          type_2_name?: string | null
+          type_2_pct?: number | null
+          type_3_name?: string | null
+          type_3_pct?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
