@@ -14,16 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      enneagram_feedback: {
+        Row: {
+          accuracy_rating: number
+          agrees_with_type: boolean | null
+          comments: string | null
+          created_at: string
+          id: string
+          result_id: string
+          suggested_type: string | null
+          user_id: string
+        }
+        Insert: {
+          accuracy_rating: number
+          agrees_with_type?: boolean | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          result_id: string
+          suggested_type?: string | null
+          user_id: string
+        }
+        Update: {
+          accuracy_rating?: number
+          agrees_with_type?: boolean | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          result_id?: string
+          suggested_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enneagram_feedback_result_id_fkey"
+            columns: ["result_id"]
+            isOneToOne: false
+            referencedRelation: "enneagram_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enneagram_results: {
         Row: {
           conversation: Json
           created_at: string
+          disintegration_direction: string | null
+          dominant_center: string | null
           dominant_subtype: string | null
+          health_level: number | null
           id: string
+          integration_direction: string | null
           subtype_preservation: number | null
           subtype_sexual: number | null
           subtype_social: number | null
           summary: string | null
+          tritype: string | null
           type_1_name: string
           type_1_pct: number
           type_2_name: string | null
@@ -31,16 +77,22 @@ export type Database = {
           type_3_name: string | null
           type_3_pct: number | null
           user_id: string
+          wing: string | null
         }
         Insert: {
           conversation?: Json
           created_at?: string
+          disintegration_direction?: string | null
+          dominant_center?: string | null
           dominant_subtype?: string | null
+          health_level?: number | null
           id?: string
+          integration_direction?: string | null
           subtype_preservation?: number | null
           subtype_sexual?: number | null
           subtype_social?: number | null
           summary?: string | null
+          tritype?: string | null
           type_1_name: string
           type_1_pct: number
           type_2_name?: string | null
@@ -48,16 +100,22 @@ export type Database = {
           type_3_name?: string | null
           type_3_pct?: number | null
           user_id: string
+          wing?: string | null
         }
         Update: {
           conversation?: Json
           created_at?: string
+          disintegration_direction?: string | null
+          dominant_center?: string | null
           dominant_subtype?: string | null
+          health_level?: number | null
           id?: string
+          integration_direction?: string | null
           subtype_preservation?: number | null
           subtype_sexual?: number | null
           subtype_social?: number | null
           summary?: string | null
+          tritype?: string | null
           type_1_name?: string
           type_1_pct?: number
           type_2_name?: string | null
@@ -65,6 +123,7 @@ export type Database = {
           type_3_name?: string | null
           type_3_pct?: number | null
           user_id?: string
+          wing?: string | null
         }
         Relationships: []
       }
