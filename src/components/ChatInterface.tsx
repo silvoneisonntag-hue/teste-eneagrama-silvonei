@@ -1,18 +1,25 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { Send, RotateCcw } from "lucide-react";
+import { Send, RotateCcw, Save, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-const ChatInterface = () => {
+interface ChatInterfaceProps {
+  onBack?: () => void;
+}
+
+const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [started, setStarted] = useState(false);
+  const [saved, setSaved] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,7 +36,6 @@ const ChatInterface = () => {
     const initialMessages: Message[] = [
       { role: "user", content: "Olá, gostaria de fazer o teste de Eneagrama." },
     ];
-
     setMessages(initialMessages);
 
     let assistantSoFar = "";
@@ -51,10 +57,7 @@ const ChatInterface = () => {
         messages: initialMessages,
         onDelta: upsertAssistant,
         onDone: () => setIsLoading(false),
-        onError: (error) => {
-          toast.error(error);
-          setIsLoading(false);
-        },
+        onError: (error) => { toast.error(error); setIsLoading(false); },
       });
     } catch {
       toast.error("Erro ao conectar com a IA");
@@ -90,10 +93,7 @@ const ChatInterface = () => {
         messages: newMessages,
         onDelta: upsertAssistant,
         onDone: () => setIsLoading(false),
-        onError: (error) => {
-          toast.error(error);
-          setIsLoading(false);
-        },
+        onError: (error) => { toast.error(error); setIsLoading(false); },
       });
     } catch {
       toast.error("Erro ao conectar com a IA");
@@ -101,10 +101,74 @@ const ChatInterface = () => {
     }
   };
 
+  const saveResults = async () => {
+    if (!user || saved) return;
+
+    // Get the last assistant message as summary
+    const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistantMsg) return;
+
+    // Try to parse type info from the last messages
+    const fullText = messages
+      .filter((m) => m.role === "assistant")
+      .map((m) => m.content)
+      .join("\n");
+
+    // Simple extraction - look for patterns like "Tipo X" with percentages
+    const typePattern = /Tipo\s+(\d+)\s*[—–-]\s*([^(]+?)\s*\((\d+)%\)/gi;
+    const matches = [...fullText.matchAll(typePattern)];
+
+    let type1Name = "Resultado salvo";
+    let type1Pct = 0;
+    let type2Name: string | null = null;
+    let type2Pct: number | null = null;
+    let type3Name: string | null = null;
+    let type3Pct: number | null = null;
+
+    if (matches.length >= 1) {
+      type1Name = `Tipo ${matches[0][1]} — ${matches[0][2].trim()}`;
+      type1Pct = parseInt(matches[0][3]);
+    }
+    if (matches.length >= 2) {
+      type2Name = `Tipo ${matches[1][1]} — ${matches[1][2].trim()}`;
+      type2Pct = parseInt(matches[1][3]);
+    }
+    if (matches.length >= 3) {
+      type3Name = `Tipo ${matches[2][1]} — ${matches[2][2].trim()}`;
+      type3Pct = parseInt(matches[2][3]);
+    }
+
+    // Extract subtype
+    const subtypePattern = /subtipo\s+predominante[:\s]*(\w+)/i;
+    const subtypeMatch = fullText.match(subtypePattern);
+    const dominantSubtype = subtypeMatch ? subtypeMatch[1] : null;
+
+    const { error } = await supabase.from("enneagram_results").insert({
+      user_id: user.id,
+      type_1_name: type1Name,
+      type_1_pct: type1Pct,
+      type_2_name: type2Name,
+      type_2_pct: type2Pct,
+      type_3_name: type3Name,
+      type_3_pct: type3Pct,
+      dominant_subtype: dominantSubtype,
+      conversation: messages as unknown as Record<string, unknown>[],
+      summary: lastAssistantMsg.content,
+    });
+
+    if (error) {
+      toast.error("Erro ao salvar resultado");
+    } else {
+      setSaved(true);
+      toast.success("Resultado salvo no seu histórico!");
+    }
+  };
+
   const resetInterview = () => {
     setMessages([]);
     setStarted(false);
     setInput("");
+    setSaved(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -113,6 +177,15 @@ const ChatInterface = () => {
       sendMessage();
     }
   };
+
+  // Check if the interview seems finished (assistant mentioned "Tipo mais provável" or similar)
+  const lastMsg = messages[messages.length - 1];
+  const interviewDone =
+    !isLoading &&
+    lastMsg?.role === "assistant" &&
+    (lastMsg.content.includes("Tipo mais provável") ||
+      lastMsg.content.includes("tipo mais provável") ||
+      lastMsg.content.includes("avaliação profissional"));
 
   if (!started) {
     return (
@@ -143,11 +216,29 @@ const ChatInterface = () => {
     <div className="flex flex-col h-[calc(100vh-5rem)] max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
-        <Button variant="ghost" size="sm" onClick={resetInterview} className="gap-2 text-muted-foreground">
-          <RotateCcw className="w-4 h-4" />
-          Recomeçar
-        </Button>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <Button variant="ghost" size="icon" onClick={onBack} className="text-muted-foreground">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          )}
+          <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {interviewDone && !saved && (
+            <Button variant="hero" size="sm" onClick={saveResults} className="gap-2 rounded-xl">
+              <Save className="w-4 h-4" />
+              Salvar Resultado
+            </Button>
+          )}
+          {saved && (
+            <span className="text-sm text-primary font-body font-medium">✓ Salvo</span>
+          )}
+          <Button variant="ghost" size="sm" onClick={resetInterview} className="gap-2 text-muted-foreground">
+            <RotateCcw className="w-4 h-4" />
+            Recomeçar
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -181,11 +272,7 @@ const ChatInterface = () => {
         </AnimatePresence>
 
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
             <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-3">
               <div className="flex gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -203,7 +290,6 @@ const ChatInterface = () => {
       <div className="border-t border-border px-4 py-4">
         <div className="flex items-end gap-3 max-w-3xl mx-auto">
           <textarea
-            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
