@@ -205,6 +205,7 @@ const RelatoriosPage = () => {
     } finally {
       setSendingId(null);
     }
+  };
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
