@@ -54,10 +54,13 @@ controle → tipo 8, harmonia → tipo 9, correto/certo → tipo 1, ajudar/ser n
 DURAÇÃO: entre 25 e 40 perguntas adaptativas. Pare quando houver evidência suficiente.
 
 ANÁLISE FINAL:
-Ao terminar, apresente:
-1) Tipo mais provável com probabilidade
-2) Segundo tipo possível com probabilidade
-3) Terceira possibilidade com probabilidade
+Ao terminar, apresente os resultados EXATAMENTE neste formato (use este formato sem exceção):
+
+**Tipo mais provável: Tipo X — Nome do Tipo (XX%)**
+**Segundo tipo possível: Tipo X — Nome do Tipo (XX%)**
+**Terceira possibilidade: Tipo X — Nome do Tipo (XX%)**
+
+Onde X é o número do tipo e XX é a porcentagem de probabilidade. SEMPRE inclua os percentuais entre parênteses.
 
 Depois do resultado, explique:
 - motivação central do tipo
