@@ -59,34 +59,24 @@ const Admin = () => {
   }, [user]);
 
   const fetchResults = async () => {
-    const { data, error } = await supabase
+    // Fetch results and profiles separately (no FK between them)
+    const { data: resultsData } = await supabase
       .from("enneagram_results")
-      .select("*, profiles!enneagram_results_user_id_fkey(display_name)")
+      .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) {
-      // Fallback: fetch without join
-      const { data: resultsOnly } = await supabase
-        .from("enneagram_results")
-        .select("*")
-        .order("created_at", { ascending: false });
+    if (resultsData) {
+      const userIds = [...new Set(resultsData.map(r => r.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
 
-      if (resultsOnly) {
-        // Fetch profiles separately
-        const userIds = [...new Set(resultsOnly.map(r => r.user_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, display_name")
-          .in("user_id", userIds);
-
-        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-        setResults(resultsOnly.map(r => ({
-          ...r,
-          profiles: profileMap.get(r.user_id) || null,
-        })) as ResultWithProfile[]);
-      }
-    } else {
-      setResults((data || []) as unknown as ResultWithProfile[]);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      setResults(resultsData.map(r => ({
+        ...r,
+        profiles: profileMap.get(r.user_id) || null,
+      })) as ResultWithProfile[]);
     }
     setLoading(false);
   };
