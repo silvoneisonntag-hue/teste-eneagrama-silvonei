@@ -40,8 +40,9 @@ const Index = () => {
       {/* Navbar */}
       <nav className="border-b border-border/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-heading text-xl font-semibold text-primary tracking-widest">
-            ENEAGRAMA
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="Logo" className="w-9 h-9" />
+            <span className="font-heading text-xl font-semibold text-primary tracking-widest">ENEAGRAMA</span>
           </Link>
           <div className="flex items-center gap-3">
             {loading ? null : user ? (
