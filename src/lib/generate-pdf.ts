@@ -123,11 +123,11 @@ export const generateEnneagramPDF = (result: PDFResult, logoBase64?: string, ski
     addSectionTitle("GRÁFICO DE TIPOS PROVÁVEIS");
 
     const types: { name: string; pct: number; color: [number, number, number] }[] = [];
-    types.push({ name: result.type_1_name, pct: result.type_1_pct, color: COLORS.gold });
-    if (result.type_2_name && result.type_2_pct) {
+    if (result.type_1_pct > 0) types.push({ name: result.type_1_name, pct: result.type_1_pct, color: COLORS.gold });
+    if (result.type_2_name && result.type_2_pct && result.type_2_pct > 0) {
       types.push({ name: result.type_2_name, pct: result.type_2_pct, color: COLORS.blue });
     }
-    if (result.type_3_name && result.type_3_pct) {
+    if (result.type_3_name && result.type_3_pct && result.type_3_pct > 0) {
       types.push({ name: result.type_3_name, pct: result.type_3_pct, color: COLORS.green });
     }
 

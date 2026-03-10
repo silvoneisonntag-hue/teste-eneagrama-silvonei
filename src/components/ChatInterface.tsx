@@ -112,8 +112,52 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       .map((m) => m.content)
       .join("\n");
 
-    const typePattern = /Tipo\s+(\d+)\s*[—–-]\s*([^(]+?)\s*\((\d+)%\)/gi;
-    const matches = [...fullText.matchAll(typePattern)];
+    // Multiple regex patterns to handle different AI output formats
+    const patterns = [
+      /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
+      /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*[:—–\-]\s*(\d+)%/gi,
+      /\*{0,2}Tipo\s+(\d+)\s*[—–\-:]\s*([^*(\n]+?)\*{0,2}\s*\((\d+)%\)/gi,
+      /(\d+)[º°]?\s*(?:tipo|lugar|posição)[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
+      /Tipo\s+(\d+)\s*\(([^)]+)\)\s*[—–\-:]\s*(\d+)%/gi,
+    ];
+
+    let allMatches: { num: string; name: string; pct: number }[] = [];
+
+    for (const pattern of patterns) {
+      const matches = [...fullText.matchAll(pattern)];
+      if (matches.length > 0) {
+        for (const m of matches) {
+          // Handle different capture group arrangements
+          if (m.length === 5) {
+            // Pattern with ordinal: group 2=num, 3=name, 4=pct
+            allMatches.push({ num: m[2], name: m[3].trim(), pct: parseInt(m[4]) });
+          } else {
+            allMatches.push({ num: m[1], name: m[2].trim(), pct: parseInt(m[3]) });
+          }
+        }
+        break; // Use first pattern that matches
+      }
+    }
+
+    // Fallback: look for any "X%" near "Tipo N" mentions
+    if (allMatches.length === 0) {
+      const loosePct = /Tipo\s+(\d+)[^%\n]{0,60}?(\d{1,3})%/gi;
+      const looseMatches = [...fullText.matchAll(loosePct)];
+      for (const m of looseMatches) {
+        const pct = parseInt(m[2]);
+        if (pct > 0 && pct <= 100) {
+          allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct });
+        }
+      }
+    }
+
+    // Deduplicate by type number, keep highest pct
+    const seen = new Map<string, { num: string; name: string; pct: number }>();
+    for (const m of allMatches) {
+      const existing = seen.get(m.num);
+      if (!existing || m.pct > existing.pct) seen.set(m.num, m);
+    }
+    const uniqueMatches = [...seen.values()].sort((a, b) => b.pct - a.pct);
 
     let type1Name = "Resultado salvo";
     let type1Pct = 0;
@@ -122,17 +166,17 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     let type3Name: string | null = null;
     let type3Pct: number | null = null;
 
-    if (matches.length >= 1) {
-      type1Name = `Tipo ${matches[0][1]} — ${matches[0][2].trim()}`;
-      type1Pct = parseInt(matches[0][3]);
+    if (uniqueMatches.length >= 1) {
+      type1Name = `Tipo ${uniqueMatches[0].num} — ${uniqueMatches[0].name}`;
+      type1Pct = uniqueMatches[0].pct;
     }
-    if (matches.length >= 2) {
-      type2Name = `Tipo ${matches[1][1]} — ${matches[1][2].trim()}`;
-      type2Pct = parseInt(matches[1][3]);
+    if (uniqueMatches.length >= 2) {
+      type2Name = `Tipo ${uniqueMatches[1].num} — ${uniqueMatches[1].name}`;
+      type2Pct = uniqueMatches[1].pct;
     }
-    if (matches.length >= 3) {
-      type3Name = `Tipo ${matches[2][1]} — ${matches[2][2].trim()}`;
-      type3Pct = parseInt(matches[2][3]);
+    if (uniqueMatches.length >= 3) {
+      type3Name = `Tipo ${uniqueMatches[2].num} — ${uniqueMatches[2].name}`;
+      type3Pct = uniqueMatches[2].pct;
     }
 
     const subtypePattern = /subtipo\s+predominante[:\s]*(\w+)/i;
