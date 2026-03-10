@@ -36,7 +36,13 @@ const Index = () => {
   if (showChat && user) {
     return (
       <div className="min-h-screen bg-background">
-        <ChatInterface onBack={() => setShowChat(false)} />
+        <ChatInterface
+          onBack={() => setShowChat(false)}
+          onResultSaved={(id) => navigate(`/result/${id}`)}
+        />
+      </div>
+    );
+  }
       </div>
     );
   }
