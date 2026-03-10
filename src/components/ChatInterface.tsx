@@ -14,7 +14,7 @@ interface ChatInterfaceProps {
   onResultSaved?: (resultId: string) => void;
 }
 
-const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
+const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
