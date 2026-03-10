@@ -114,11 +114,22 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     // Multiple regex patterns to handle different AI output formats
     const patterns = [
+      // "Tipo 4 — O Individualista (65%)"
       /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
+      // "Tipo 4 — O Individualista: 65%"
       /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*[:—–\-]\s*(\d+)%/gi,
+      // "**Tipo 4 — O Individualista** (65%)"
       /\*{0,2}Tipo\s+(\d+)\s*[—–\-:]\s*([^*(\n]+?)\*{0,2}\s*\((\d+)%\)/gi,
+      // "1º tipo: Tipo 4 — O Individualista (65%)"
       /(\d+)[º°]?\s*(?:tipo|lugar|posição)[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
+      // "Tipo 4 (O Individualista) — 65%"
       /Tipo\s+(\d+)\s*\(([^)]+)\)\s*[—–\-:]\s*(\d+)%/gi,
+      // "Tipo 4 com Asa 3 (4w3) — 65%" or "Tipo 4 com Asa 3: 65%"
+      /Tipo\s+(\d+)\s+com\s+[Aa]sa\s+\d+[^—–\-:\n]*?[—–\-:]\s*(\d+)%/gi,
+      // "Tipo mais provável: 4" with percentage nearby
+      /Tipo\s+mais\s+prov[áa]vel[:\s]*(\d+)\s*[—–\-]?\s*([^(\n]*?)\s*\(?(\d+)%\)?/gi,
+      // "Tipo 4: 65%" simple format
+      /Tipo\s+(\d+)\s*:\s*(\d+)%/gi,
     ];
 
     let allMatches: { num: string; name: string; pct: number }[] = [];
@@ -127,10 +138,15 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       const matches = [...fullText.matchAll(pattern)];
       if (matches.length > 0) {
         for (const m of matches) {
-          // Handle different capture group arrangements
-          if (m.length === 5) {
+          if (pattern === patterns[3] && m.length === 5) {
             // Pattern with ordinal: group 2=num, 3=name, 4=pct
             allMatches.push({ num: m[2], name: m[3].trim(), pct: parseInt(m[4]) });
+          } else if (pattern === patterns[5]) {
+            // "Tipo N com Asa X: pct%" — only 2 capture groups
+            allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
+          } else if (pattern === patterns[7]) {
+            // "Tipo N: pct%" — only 2 capture groups
+            allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
           } else {
             allMatches.push({ num: m[1], name: m[2].trim(), pct: parseInt(m[3]) });
           }
@@ -141,12 +157,29 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     // Fallback: look for any "X%" near "Tipo N" mentions
     if (allMatches.length === 0) {
-      const loosePct = /Tipo\s+(\d+)[^%\n]{0,60}?(\d{1,3})%/gi;
+      const loosePct = /Tipo\s+(\d+)[^%\n]{0,80}?(\d{1,3})%/gi;
       const looseMatches = [...fullText.matchAll(loosePct)];
       for (const m of looseMatches) {
         const pct = parseInt(m[2]);
         if (pct > 0 && pct <= 100) {
           allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct });
+        }
+      }
+    }
+
+    // Last resort: look for "N%" patterns in final message context
+    if (allMatches.length === 0) {
+      const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+      if (lastAssistant) {
+        const tipoNumPattern = /Tipo\s+(\d+)/gi;
+        const tipoNums = [...lastAssistant.content.matchAll(tipoNumPattern)];
+        const uniqueNums = [...new Set(tipoNums.map(m => m[1]))];
+        if (uniqueNums.length > 0) {
+          // Assign descending percentages based on mention order
+          uniqueNums.forEach((num, i) => {
+            const estimatedPct = Math.max(80 - i * 20, 10);
+            allMatches.push({ num, name: `Tipo ${num}`, pct: estimatedPct });
+          });
         }
       }
     }
@@ -179,9 +212,36 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       type3Pct = uniqueMatches[2].pct;
     }
 
-    const subtypePattern = /subtipo\s+predominante[:\s]*(\w+)/i;
-    const subtypeMatch = fullText.match(subtypePattern);
-    const dominantSubtype = subtypeMatch ? subtypeMatch[1] : null;
+    // Extract subtypes with broader patterns
+    const subtypePatterns = [
+      /subtipo\s+(?:predominante|dominante)[:\s]*(\w+)/i,
+      /subtipo[:\s]*(\w+)/i,
+      /subtipo\s+(\w+)\s*(?:\(|—|–|-)/i,
+    ];
+    let dominantSubtype: string | null = null;
+    for (const sp of subtypePatterns) {
+      const sm = fullText.match(sp);
+      if (sm) { dominantSubtype = sm[1]; break; }
+    }
+
+    // Extract wing
+    const wingPatterns = [
+      /[Aa]sa\s+(\d+)\s*\((\d+)w(\d+)\)/i,
+      /(\d+)w(\d+)/i,
+      /[Aa]sa\s+(\d+)/i,
+    ];
+    let wing: string | null = null;
+    for (const wp of wingPatterns) {
+      const wm = fullText.match(wp);
+      if (wm) {
+        if (wm[0].match(/\d+w\d+/)) {
+          wing = wm[0].match(/\d+w\d+/)![0];
+        } else {
+          wing = `Asa ${wm[1]}`;
+        }
+        break;
+      }
+    }
 
     const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
 
@@ -194,6 +254,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       type_3_name: type3Name,
       type_3_pct: type3Pct,
       dominant_subtype: dominantSubtype,
+      wing,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
       summary: lastAssistantMsg?.content || null,
     }]).select("id").single();
@@ -218,14 +279,20 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
   };
 
-  // Check if the interview seems finished (assistant mentioned "Tipo mais provável" or similar)
+  // Check if the interview seems finished - require enough messages AND final result indicators
   const lastMsg = messages[messages.length - 1];
+  const hasEnoughMessages = messages.filter(m => m.role === "user").length >= 10;
   const interviewDone =
     !isLoading &&
+    hasEnoughMessages &&
     lastMsg?.role === "assistant" &&
-    (lastMsg.content.includes("Tipo mais provável") ||
-      lastMsg.content.includes("tipo mais provável") ||
-      lastMsg.content.includes("avaliação profissional"));
+    (
+      // Must contain percentage-like result indicators
+      (/Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.toLowerCase().includes("tipo mais provável")) ||
+      // Or explicit final analysis markers with percentages somewhere in conversation
+      (lastMsg.content.toLowerCase().includes("análise final") && /\d+%/.test(lastMsg.content)) ||
+      (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content))
+    );
 
   // Auto-save when interview is done
   useEffect(() => {
