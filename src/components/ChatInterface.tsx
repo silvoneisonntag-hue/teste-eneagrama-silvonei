@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
-import { Send, RotateCcw, Save, ArrowLeft } from "lucide-react";
+import { Send, RotateCcw, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +19,7 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [started, setStarted] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [autoSaved, setAutoSaved] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -102,20 +102,15 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     }
   };
 
-  const saveResults = async () => {
-    if (!user || saved) return;
+  // Auto-save results silently when interview finishes
+  const autoSaveResults = async () => {
+    if (!user || autoSaved) return;
 
-    // Get the last assistant message as summary
-    const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
-    if (!lastAssistantMsg) return;
-
-    // Try to parse type info from the last messages
     const fullText = messages
       .filter((m) => m.role === "assistant")
       .map((m) => m.content)
       .join("\n");
 
-    // Simple extraction - look for patterns like "Tipo X" with percentages
     const typePattern = /Tipo\s+(\d+)\s*[—–-]\s*([^(]+?)\s*\((\d+)%\)/gi;
     const matches = [...fullText.matchAll(typePattern)];
 
@@ -139,12 +134,13 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       type3Pct = parseInt(matches[2][3]);
     }
 
-    // Extract subtype
     const subtypePattern = /subtipo\s+predominante[:\s]*(\w+)/i;
     const subtypeMatch = fullText.match(subtypePattern);
     const dominantSubtype = subtypeMatch ? subtypeMatch[1] : null;
 
-    const { error } = await supabase.from("enneagram_results").insert([{
+    const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
+
+    await supabase.from("enneagram_results").insert([{
       user_id: user.id,
       type_1_name: type1Name,
       type_1_pct: type1Pct,
@@ -154,22 +150,17 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
       type_3_pct: type3Pct,
       dominant_subtype: dominantSubtype,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
-      summary: lastAssistantMsg.content,
+      summary: lastAssistantMsg?.content || null,
     }]);
 
-    if (error) {
-      toast.error("Erro ao salvar resultado");
-    } else {
-      setSaved(true);
-      toast.success("Resultado salvo no seu histórico!");
-    }
+    setAutoSaved(true);
   };
 
   const resetInterview = () => {
     setMessages([]);
     setStarted(false);
     setInput("");
-    setSaved(false);
+    setAutoSaved(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -187,6 +178,13 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
     (lastMsg.content.includes("Tipo mais provável") ||
       lastMsg.content.includes("tipo mais provável") ||
       lastMsg.content.includes("avaliação profissional"));
+
+  // Auto-save when interview is done
+  useEffect(() => {
+    if (interviewDone && !autoSaved) {
+      autoSaveResults();
+    }
+  }, [interviewDone, autoSaved]);
 
   if (!started) {
     return (
@@ -226,15 +224,6 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
           <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
         </div>
         <div className="flex items-center gap-2">
-          {interviewDone && !saved && (
-            <Button variant="hero" size="sm" onClick={saveResults} className="gap-2 rounded-xl">
-              <Save className="w-4 h-4" />
-              Salvar Resultado
-            </Button>
-          )}
-          {saved && (
-            <span className="text-sm text-primary font-body font-medium">✓ Salvo</span>
-          )}
           <Button variant="ghost" size="sm" onClick={resetInterview} className="gap-2 text-muted-foreground">
             <RotateCcw className="w-4 h-4" />
             Recomeçar
