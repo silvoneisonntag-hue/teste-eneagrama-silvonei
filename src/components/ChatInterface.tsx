@@ -254,6 +254,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       type_3_name: type3Name,
       type_3_pct: type3Pct,
       dominant_subtype: dominantSubtype,
+      wing,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
       summary: lastAssistantMsg?.content || null,
     }]).select("id").single();
