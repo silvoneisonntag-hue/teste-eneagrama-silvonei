@@ -224,15 +224,6 @@ const ChatInterface = ({ onBack }: ChatInterfaceProps) => {
           <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
         </div>
         <div className="flex items-center gap-2">
-          {interviewDone && !saved && (
-            <Button variant="hero" size="sm" onClick={saveResults} className="gap-2 rounded-xl">
-              <Save className="w-4 h-4" />
-              Salvar Resultado
-            </Button>
-          )}
-          {saved && (
-            <span className="text-sm text-primary font-body font-medium">✓ Salvo</span>
-          )}
           <Button variant="ghost" size="sm" onClick={resetInterview} className="gap-2 text-muted-foreground">
             <RotateCcw className="w-4 h-4" />
             Recomeçar
