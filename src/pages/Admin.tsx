@@ -8,6 +8,7 @@ import { Download, Shield, ChevronDown, ChevronUp, ArrowLeft } from "lucide-reac
 import { toast } from "sonner";
 import { generateEnneagramPDF } from "@/lib/generate-pdf";
 import AdminStats from "@/components/AdminStats";
+import logoSrc from "@/assets/logo.png";
 
 interface ResultWithProfile {
   id: string;
@@ -88,8 +89,20 @@ const Admin = () => {
     return profile?.display_name || userId.slice(0, 8);
   };
 
-  const handleGeneratePDF = (result: ResultWithProfile) => {
-    generateEnneagramPDF(result);
+  const handleGeneratePDF = async (result: ResultWithProfile) => {
+    // Convert logo to base64
+    let logoBase64: string | undefined;
+    try {
+      const response = await fetch(logoSrc);
+      const blob = await response.blob();
+      logoBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+    } catch { /* proceed without logo */ }
+
+    generateEnneagramPDF(result, logoBase64);
     toast.success("PDF gerado com sucesso!");
   };
 
