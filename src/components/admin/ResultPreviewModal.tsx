@@ -64,6 +64,7 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
   const [generating, setGenerating] = useState(false);
 
   const handleGeneratePDF = async () => {
+    if (!result) return;
     setGenerating(true);
     toast.info(`Gerando relatório ${REPORT_LEVEL_LABELS[level]}...`);
     try {
@@ -111,6 +112,8 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
       day: "2-digit", month: "long", year: "numeric",
       hour: "2-digit", minute: "2-digit",
     });
+
+  if (!result) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
