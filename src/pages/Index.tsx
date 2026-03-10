@@ -127,7 +127,7 @@ const Index = () => {
               <motion.img
                 src={enneagramSymbol}
                 alt="Símbolo do Eneagrama com nove pontos interconectados"
-                className="w-72 lg:w-80 drop-shadow-[0_0_40px_hsl(43_80%_55%_/_0.3)]"
+                className="w-[346px] lg:w-96 drop-shadow-[0_0_40px_hsl(43_80%_55%_/_0.3)]"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
               />
