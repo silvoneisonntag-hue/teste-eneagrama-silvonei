@@ -112,14 +112,21 @@ const History = () => {
                       {formatDate(result.created_at)}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteResult(result.id)}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Link to={`/result/${result.id}`}>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteResult(result.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {result.type_2_name && (

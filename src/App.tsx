@@ -10,6 +10,8 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
+import History from "./pages/History.tsx";
+import Result from "./pages/Result.tsx";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/result/:id" element={<Result />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
