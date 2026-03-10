@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Circle, Sparkles, Brain, LogOut, History, User } from "lucide-react";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
+import logo from "@/assets/logo.png";
 import ChatInterface from "@/components/ChatInterface";
 import { useAuth } from "@/contexts/AuthContext";
 
