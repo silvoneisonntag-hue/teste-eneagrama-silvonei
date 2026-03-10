@@ -70,7 +70,7 @@ const Admin = () => {
       const userIds = [...new Set(resultsData.map(r => r.user_id))];
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name")
+        .select("user_id, display_name, phone")
         .in("user_id", userIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
