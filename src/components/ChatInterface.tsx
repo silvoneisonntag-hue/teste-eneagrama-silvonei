@@ -112,46 +112,70 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       .map((m) => m.content)
       .join("\n");
 
-    // Multiple regex patterns to handle different AI output formats
-    const patterns = [
-      // "Tipo 4 — O Individualista (65%)"
-      /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
-      // "Tipo 4 — O Individualista: 65%"
-      /Tipo\s+(\d+)\s*[—–\-:]\s*([^(\n]+?)\s*[:—–\-]\s*(\d+)%/gi,
-      // "**Tipo 4 — O Individualista** (65%)"
-      /\*{0,2}Tipo\s+(\d+)\s*[—–\-:]\s*([^*(\n]+?)\*{0,2}\s*\((\d+)%\)/gi,
-      // "1º tipo: Tipo 4 — O Individualista (65%)"
-      /(\d+)[º°]?\s*(?:tipo|lugar|posição)[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*([^(\n]+?)\s*\((\d+)%\)/gi,
-      // "Tipo 4 (O Individualista) — 65%"
-      /Tipo\s+(\d+)\s*\(([^)]+)\)\s*[—–\-:]\s*(\d+)%/gi,
-      // "Tipo 4 com Asa 3 (4w3) — 65%" or "Tipo 4 com Asa 3: 65%"
-      /Tipo\s+(\d+)\s+com\s+[Aa]sa\s+\d+[^—–\-:\n]*?[—–\-:]\s*(\d+)%/gi,
-      // "Tipo mais provável: 4" with percentage nearby
-      /Tipo\s+mais\s+prov[áa]vel[:\s]*(\d+)\s*[—–\-]?\s*([^(\n]*?)\s*\(?(\d+)%\)?/gi,
-      // "Tipo 4: 65%" simple format
-      /Tipo\s+(\d+)\s*:\s*(\d+)%/gi,
+    // Parse the structured "Resumo executivo" section from the final report
+    // Priority: parse from last assistant message first (the final report)
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    const reportText = lastAssistant?.content || fullText;
+
+    // Structured format patterns (from Resumo executivo)
+    const structuredPatterns = [
+      // "Tipo mais provável: Tipo 9 — O Pacificador (com forte traço de ação) (85%)"
+      /Tipo\s+mais\s+prov[áa]vel[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*(.+?)\s*\((\d+)%\)/i,
+      // "Segundo tipo possível: Tipo 6 — O Questionador (10%)"
+      /Segundo\s+tipo\s+poss[íi]vel[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*(.+?)\s*\((\d+)%\)/i,
+      // "Terceira possibilidade: Tipo 1 — O Reformador (5%)"
+      /Terceira\s+possibilidade[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*(.+?)\s*\((\d+)%\)/i,
     ];
 
     let allMatches: { num: string; name: string; pct: number }[] = [];
 
-    for (const pattern of patterns) {
-      const matches = [...fullText.matchAll(pattern)];
-      if (matches.length > 0) {
-        for (const m of matches) {
-          if (pattern === patterns[3] && m.length === 5) {
-            // Pattern with ordinal: group 2=num, 3=name, 4=pct
-            allMatches.push({ num: m[2], name: m[3].trim(), pct: parseInt(m[4]) });
-          } else if (pattern === patterns[5]) {
-            // "Tipo N com Asa X: pct%" — only 2 capture groups
-            allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
-          } else if (pattern === patterns[7]) {
-            // "Tipo N: pct%" — only 2 capture groups
-            allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
-          } else {
-            allMatches.push({ num: m[1], name: m[2].trim(), pct: parseInt(m[3]) });
+    // Try structured patterns first (most reliable)
+    for (const sp of structuredPatterns) {
+      const m = reportText.match(sp);
+      if (m) {
+        allMatches.push({ num: m[1], name: m[2].trim().replace(/\*+/g, ""), pct: parseInt(m[3]) });
+      }
+    }
+
+    // Fallback: generic patterns if structured didn't find enough
+    if (allMatches.length < 2) {
+      allMatches = []; // Reset to avoid mixing
+      const genericPatterns = [
+        // "Tipo 4 — O Individualista (65%)" — allows parens in name via .+?
+        /Tipo\s+(\d+)\s*[—–\-:]\s*(.+?)\s*\((\d+)%\)/gi,
+        // "**Tipo 4 — O Individualista** (65%)"
+        /\*{0,2}Tipo\s+(\d+)\s*[—–\-:]\s*(.+?)\*{0,2}\s*\((\d+)%\)/gi,
+        // "Tipo 4 (O Individualista) — 65%"
+        /Tipo\s+(\d+)\s*\(([^)]+)\)\s*[—–\-:]\s*(\d+)%/gi,
+        // "Tipo 4: 65%" simple format
+        /Tipo\s+(\d+)\s*:\s*(\d+)%/gi,
+      ];
+
+      for (const pattern of genericPatterns) {
+        const matches = [...reportText.matchAll(pattern)];
+        if (matches.length > 0) {
+          for (const m of matches) {
+            if (pattern === genericPatterns[3]) {
+              // "Tipo N: pct%" — only 2 capture groups
+              allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
+            } else {
+              allMatches.push({ num: m[1], name: m[2].trim().replace(/\*+/g, ""), pct: parseInt(m[3]) });
+            }
           }
+          break;
         }
-        break; // Use first pattern that matches
+      }
+    }
+
+    // Fallback: look for any "X%" near "Tipo N" mentions
+    if (allMatches.length === 0) {
+      const loosePct = /Tipo\s+(\d+)[^%\n]{0,80}?(\d{1,3})%/gi;
+      const looseMatches = [...reportText.matchAll(loosePct)];
+      for (const m of looseMatches) {
+        const pct = parseInt(m[2]);
+        if (pct > 0 && pct <= 100) {
+          allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct });
+        }
       }
     }
 
