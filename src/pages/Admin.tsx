@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Download, Shield, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { generateEnneagramPDF, ReportLevel } from "@/lib/generate-pdf";
+import { generateEnneagramPDF, ReportLevel, ReportSections } from "@/lib/generate-pdf";
 import AdminStats from "@/components/AdminStats";
 import logoSrc from "@/assets/logo.png";
 
@@ -27,6 +27,11 @@ interface ResultWithProfile {
   conversation: any;
   created_at: string;
   user_id: string;
+  integration_direction: string | null;
+  disintegration_direction: string | null;
+  subtype_preservation: number | null;
+  subtype_social: number | null;
+  subtype_sexual: number | null;
   profiles: { display_name: string | null } | null;
 }
 
@@ -90,10 +95,9 @@ const Admin = () => {
   };
 
   const handleGeneratePDF = async (result: ResultWithProfile) => {
-    toast.info("Gerando relatório com IA...");
+    toast.info("Gerando relatório completo com IA...");
 
-    // Fetch logo and skills in parallel
-    const [logoBase64, skills] = await Promise.all([
+    const [logoBase64, reportData] = await Promise.all([
       (async () => {
         try {
           const response = await fetch(logoSrc);
@@ -105,30 +109,34 @@ const Admin = () => {
           });
         } catch { return undefined; }
       })(),
-      (async () => {
+      (async (): Promise<ReportSections | null> => {
         try {
-          const { data, error } = await supabase.functions.invoke("enneagram-skills", {
+          const { data, error } = await supabase.functions.invoke("enneagram-report", {
             body: {
-              type_1_name: result.type_1_name,
-              type_1_pct: result.type_1_pct,
-              type_2_name: result.type_2_name,
-              type_2_pct: result.type_2_pct,
-              type_3_name: result.type_3_name,
-              type_3_pct: result.type_3_pct,
-              wing: result.wing,
-              dominant_subtype: result.dominant_subtype,
+              type_1_name: result.type_1_name, type_1_pct: result.type_1_pct,
+              type_2_name: result.type_2_name, type_2_pct: result.type_2_pct,
+              type_3_name: result.type_3_name, type_3_pct: result.type_3_pct,
+              wing: result.wing, dominant_subtype: result.dominant_subtype,
+              dominant_center: result.dominant_center, tritype: result.tritype,
+              health_level: result.health_level,
+              integration_direction: result.integration_direction,
+              disintegration_direction: result.disintegration_direction,
+              subtype_preservation: result.subtype_preservation,
+              subtype_social: result.subtype_social,
+              subtype_sexual: result.subtype_sexual,
+              level: "completo",
             },
           });
           if (error) throw error;
-          return data;
+          return data?.sections || null;
         } catch (e) {
-          console.error("Skills generation failed:", e);
+          console.error("Report generation failed:", e);
           return null;
         }
       })(),
     ]);
 
-    generateEnneagramPDF(result, logoBase64, skills);
+    generateEnneagramPDF(result, logoBase64, reportData, "completo");
     toast.success("PDF gerado com sucesso!");
   };
 

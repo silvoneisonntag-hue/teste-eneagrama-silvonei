@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
-import { generateEnneagramPDF, ReportLevel, REPORT_LEVEL_LABELS } from "@/lib/generate-pdf";
+import { generateEnneagramPDF, ReportLevel, REPORT_LEVEL_LABELS, ReportSections } from "@/lib/generate-pdf";
 import { supabase } from "@/integrations/supabase/client";
 import logoSrc from "@/assets/logo.png";
 
@@ -66,10 +66,9 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
   const handleGeneratePDF = async () => {
     if (!result) return;
     setGenerating(true);
-    toast.info(`Gerando relatório ${REPORT_LEVEL_LABELS[level]}...`);
+    toast.info(`Gerando relatório ${REPORT_LEVEL_LABELS[level]}... Isso pode levar alguns segundos.`);
     try {
-      const needsSkills = level !== "basico";
-      const [logoBase64, skills] = await Promise.all([
+      const [logoBase64, reportData] = await Promise.all([
         (async () => {
           try {
             const resp = await fetch(logoSrc);
@@ -81,25 +80,41 @@ const ResultPreviewModal = ({ result, open, onOpenChange }: Props) => {
             });
           } catch { return undefined; }
         })(),
-        needsSkills
-          ? (async () => {
-              try {
-                const { data, error } = await supabase.functions.invoke("enneagram-skills", {
-                  body: {
-                    type_1_name: result.type_1_name, type_1_pct: result.type_1_pct,
-                    type_2_name: result.type_2_name, type_2_pct: result.type_2_pct,
-                    type_3_name: result.type_3_name, type_3_pct: result.type_3_pct,
-                    wing: result.wing, dominant_subtype: result.dominant_subtype,
-                  },
-                });
-                if (error) throw error;
-                return data;
-              } catch { return null; }
-            })()
-          : Promise.resolve(null),
+        (async (): Promise<ReportSections | null> => {
+          if (level === "basico") return null;
+          try {
+            const { data, error } = await supabase.functions.invoke("enneagram-report", {
+              body: {
+                type_1_name: result.type_1_name, type_1_pct: result.type_1_pct,
+                type_2_name: result.type_2_name, type_2_pct: result.type_2_pct,
+                type_3_name: result.type_3_name, type_3_pct: result.type_3_pct,
+                wing: result.wing, dominant_subtype: result.dominant_subtype,
+                dominant_center: result.dominant_center, tritype: result.tritype,
+                health_level: result.health_level,
+                integration_direction: result.integration_direction,
+                disintegration_direction: result.disintegration_direction,
+                subtype_preservation: result.subtype_preservation,
+                subtype_social: result.subtype_social,
+                subtype_sexual: result.subtype_sexual,
+                level,
+              },
+            });
+            if (error) throw error;
+            return data?.sections || null;
+          } catch (e) {
+            console.error("Report generation failed:", e);
+            toast.error("Erro ao gerar seções com IA. Gerando PDF sem conteúdo personalizado.");
+            return null;
+          }
+        })(),
       ]);
-      generateEnneagramPDF({ ...result, profiles: { display_name: result.display_name, phone: result.phone } } as any, logoBase64, skills, level);
-      toast.success("PDF gerado!");
+      generateEnneagramPDF(
+        { ...result, profiles: { display_name: result.display_name, phone: result.phone } } as any,
+        logoBase64,
+        reportData,
+        level,
+      );
+      toast.success("PDF gerado com sucesso!");
     } catch {
       toast.error("Erro ao gerar PDF");
     } finally {
