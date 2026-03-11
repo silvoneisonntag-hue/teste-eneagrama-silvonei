@@ -27,6 +27,11 @@ interface ResultWithProfile {
   conversation: any;
   created_at: string;
   user_id: string;
+  integration_direction: string | null;
+  disintegration_direction: string | null;
+  subtype_preservation: number | null;
+  subtype_social: number | null;
+  subtype_sexual: number | null;
   profiles: { display_name: string | null } | null;
 }
 
