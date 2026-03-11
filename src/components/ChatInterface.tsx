@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
-import { Send, RotateCcw, ArrowLeft } from "lucide-react";
+import { Send, RotateCcw, ArrowLeft, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
 import { supabase } from "@/integrations/supabase/client";
@@ -356,6 +357,20 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+        {/* Fixed disclaimer card */}
+        <div className="rounded-xl border-2 border-primary/60 bg-primary/10 p-4 space-y-2">
+          <p className="font-body text-xs font-bold text-primary flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 flex-shrink-0" />
+            Leia antes de começar
+          </p>
+          <p className="font-body text-xs text-foreground/80 leading-relaxed">
+            Responda com <strong>honestidade e fidelidade à sua experiência real</strong> — não ao que gostaria de ser, mas ao que realmente acontece na sua vida.
+          </p>
+          <p className="font-body text-xs text-foreground/80 leading-relaxed">
+            📌 Considere seus padrões <span className="text-primary font-semibold">desde os 18 anos até hoje</span>, tanto em situações <span className="text-primary font-semibold">pessoais</span> quanto <span className="text-primary font-semibold">profissionais</span>.
+          </p>
+        </div>
+
         <AnimatePresence>
           {messages.map((msg, i) => (
             <motion.div
