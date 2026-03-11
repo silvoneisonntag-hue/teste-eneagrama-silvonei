@@ -251,7 +251,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
+    // lastAssistant already defined above
 
     const { data, error } = await supabase.from("enneagram_results").insert([{
       user_id: user.id,
