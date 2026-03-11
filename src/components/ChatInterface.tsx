@@ -179,32 +179,16 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    // Fallback: look for any "X%" near "Tipo N" mentions
-    if (allMatches.length === 0) {
-      const loosePct = /Tipo\s+(\d+)[^%\n]{0,80}?(\d{1,3})%/gi;
-      const looseMatches = [...fullText.matchAll(loosePct)];
-      for (const m of looseMatches) {
-        const pct = parseInt(m[2]);
-        if (pct > 0 && pct <= 100) {
-          allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct });
-        }
-      }
-    }
-
-    // Last resort: look for "N%" patterns in final message context
-    if (allMatches.length === 0) {
-      const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-      if (lastAssistant) {
-        const tipoNumPattern = /Tipo\s+(\d+)/gi;
-        const tipoNums = [...lastAssistant.content.matchAll(tipoNumPattern)];
-        const uniqueNums = [...new Set(tipoNums.map(m => m[1]))];
-        if (uniqueNums.length > 0) {
-          // Assign descending percentages based on mention order
-          uniqueNums.forEach((num, i) => {
-            const estimatedPct = Math.max(80 - i * 20, 10);
-            allMatches.push({ num, name: `Tipo ${num}`, pct: estimatedPct });
-          });
-        }
+    // Last resort: look for "Tipo N" mentions and estimate percentages
+    if (allMatches.length === 0 && lastAssistant) {
+      const tipoNumPattern = /Tipo\s+(\d+)/gi;
+      const tipoNums = [...lastAssistant.content.matchAll(tipoNumPattern)];
+      const uniqueNums = [...new Set(tipoNums.map(m => m[1]))];
+      if (uniqueNums.length > 0) {
+        uniqueNums.forEach((num, i) => {
+          const estimatedPct = Math.max(80 - i * 20, 10);
+          allMatches.push({ num, name: `Tipo ${num}`, pct: estimatedPct });
+        });
       }
     }
 
