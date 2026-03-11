@@ -264,7 +264,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       dominant_subtype: dominantSubtype,
       wing,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
-      summary: lastAssistantMsg?.content || null,
+      summary: lastAssistant?.content || null,
     }]).select("id").single();
 
     setAutoSaved(true);
