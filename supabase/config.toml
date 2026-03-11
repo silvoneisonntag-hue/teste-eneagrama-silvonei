@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.enneagram-skills]
 verify_jwt = false
+
+[functions.enneagram-report]
+verify_jwt = false
