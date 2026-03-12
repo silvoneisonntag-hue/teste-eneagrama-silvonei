@@ -333,7 +333,6 @@ export const generateEnneagramPDF = (
     sectionBanner("Os Nove Tipos de Personalidade");
 
     text("No centro do Eneagrama estão os nove tipos de personalidade, cada um com uma essência única, moldada por motivações e medos profundos. Os tipos são agrupados em três centros: instintivo (Tipos 8, 9, 1), emocional (Tipos 2, 3, 4) e mental (Tipos 5, 6, 7).", 9, C.darkPurple);
-    y += 2;
 
     for (const t of NINE_TYPES_TEXT) {
       bullet(t, C.darkPurple, C.gold);
