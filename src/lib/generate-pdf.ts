@@ -493,12 +493,11 @@ export const generateEnneagramPDF = (
 
   // Integration (completo only)
   if (s.integracao && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Pontos de Integração: ${result.type_1_name}`);
     if (result.integration_direction) {
       text(`Integra com: ${result.integration_direction}`, 10, C.green, true);
-      y += 2;
     }
     text(s.integracao, 9, C.darkPurple);
   }
