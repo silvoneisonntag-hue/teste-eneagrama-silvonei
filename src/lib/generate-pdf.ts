@@ -177,15 +177,14 @@ export const generateEnneagramPDF = (
 
   const sectionBanner = (title: string) => {
     check(18);
-    y += 4;
-    // Gold background banner
+    y += 2;
     doc.setFillColor(...col(C.goldBg));
     doc.roundedRect(m, y - 5, cw, 12, 2, 2, "F");
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...col(C.goldDark));
     doc.text(title, pw / 2, y + 2, { align: "center" });
-    y += 14;
+    y += 11;
   };
 
   const sectionTitle = (title: string) => {
