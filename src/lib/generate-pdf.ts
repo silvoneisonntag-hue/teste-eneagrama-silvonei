@@ -540,11 +540,10 @@ export const generateEnneagramPDF = (
 
   // Reflection questions (completo only)
   if (s.reflexao?.length && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner("REFLITA UM POUCO");
     text(`Como ${result.type_1_name.split(" - ")[0] || result.type_1_name}, estas perguntas o convidarão a explorar sua jornada:`, 9, C.gray);
-    y += 2;
     for (const q of s.reflexao) {
       bullet(q, C.darkPurple, C.purple);
     }
