@@ -551,8 +551,8 @@ export const generateEnneagramPDF = (
 
   // Full analysis from summary (completo only)
   if (result.summary && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner("ANÁLISE COMPLETA");
     const cleanSummary = result.summary.replace(/[#*_`]/g, "");
     text(cleanSummary, 9, C.darkPurple);
