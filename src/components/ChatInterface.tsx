@@ -485,6 +485,16 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
             }}
           />
           <Button
+            variant={isRecording ? "destructive" : "ghost"}
+            size="icon"
+            onClick={toggleRecording}
+            disabled={isLoading}
+            className={`rounded-xl h-12 w-12 shrink-0 ${isRecording ? "animate-pulse" : "text-muted-foreground hover:text-foreground"}`}
+            title={isRecording ? "Parar gravação" : "Gravar áudio"}
+          >
+            {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </Button>
+          <Button
             variant="hero"
             size="icon"
             onClick={sendMessage}
