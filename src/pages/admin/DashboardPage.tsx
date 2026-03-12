@@ -117,6 +117,21 @@ const DashboardPage = () => {
     { label: "Nota Média", value: stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "—", icon: Star, color: "bg-amber-100 text-amber-600", suffix: stats.avgRating > 0 ? "/5" : "" },
   ];
 
+  const exportData = {
+    profileName,
+    totalResults: stats.totalResults,
+    uniqueClients: stats.uniqueClients,
+    feedbackCount: stats.feedbackCount,
+    avgRating: stats.avgRating,
+    typeDistribution: stats.typeDistribution,
+    subtypeDistribution: stats.subtypeDistribution,
+    recentResults: stats.recentResults.map((r) => ({
+      clientName: profilesMap[r.user_id] || "Usuário",
+      typeName: r.type_1_name,
+      date: new Date(r.created_at).toLocaleDateString("pt-BR"),
+    })),
+  };
+
   const quickActions = [
     { label: "Novo Cliente", icon: UserPlus, onClick: () => navigate("/admin/clientes"), color: "bg-violet-600 hover:bg-violet-700 text-white" },
     { label: "Ver Relatórios", icon: BarChart3, onClick: () => navigate("/admin/relatorios"), color: "bg-blue-600 hover:bg-blue-700 text-white" },
