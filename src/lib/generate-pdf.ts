@@ -528,7 +528,6 @@ export const generateEnneagramPDF = (
     for (const skill of s.habilidades_naturais) {
       bullet(skill, C.darkPurple, C.green);
     }
-    y += 2;
   }
 
   if (s.habilidades_desenvolver?.length && (level === "intermediario" || level === "completo")) {
