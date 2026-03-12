@@ -536,7 +536,6 @@ export const generateEnneagramPDF = (
     for (const skill of s.habilidades_desenvolver) {
       bullet(skill, C.darkPurple, C.orange);
     }
-    y += 2;
   }
 
   // Reflection questions (completo only)
