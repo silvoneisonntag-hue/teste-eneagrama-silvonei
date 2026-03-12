@@ -11,6 +11,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { exportDashboardCSV, exportDashboardPDF } from "@/lib/export-dashboard";
 
 const COLORS = [
   "#7c3aed", "#eab308", "#3b82f6", "#ef4444",
