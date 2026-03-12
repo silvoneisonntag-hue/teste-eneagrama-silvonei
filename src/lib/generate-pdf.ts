@@ -455,8 +455,8 @@ export const generateEnneagramPDF = (
 
   // Motivations & Fears (completo only)
   if (s.motivacoes_medos && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Motivações e Medos: ${result.type_1_name}`);
     text(s.motivacoes_medos, 9, C.darkPurple);
   }
