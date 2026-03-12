@@ -189,16 +189,16 @@ export const generateEnneagramPDF = (
 
   const sectionTitle = (title: string) => {
     check(14);
-    y += 3;
+    y += 2;
     doc.setDrawColor(...col(C.gold));
     doc.setLineWidth(0.8);
     doc.line(m, y, m + 25, y);
-    y += 5;
+    y += 4;
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...col(C.darkPurple));
     doc.text(title, m, y);
-    y += 7;
+    y += 5;
   };
 
   const separator = () => {
