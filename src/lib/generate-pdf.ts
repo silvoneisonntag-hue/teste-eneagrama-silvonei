@@ -470,8 +470,8 @@ export const generateEnneagramPDF = (
 
   // Team & Conflicts (completo only)
   if (s.equipe_conflitos && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Como age em equipe e lida com conflitos`);
     text(s.equipe_conflitos, 9, C.darkPurple);
   }
