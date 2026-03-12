@@ -203,11 +203,11 @@ export const generateEnneagramPDF = (
 
   const separator = () => {
     check(6);
-    y += 2;
+    y += 1;
     doc.setDrawColor(...col(C.lightGray));
     doc.setLineWidth(0.3);
     doc.line(m, y, pw - m, y);
-    y += 4;
+    y += 3;
   };
 
   const field = (label: string, value: string) => {
