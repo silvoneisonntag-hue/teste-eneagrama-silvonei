@@ -151,7 +151,22 @@ const DashboardPage = () => {
               Aqui está o resumo da sua plataforma
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => exportDashboardCSV(exportData)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">CSV</span>
+            </button>
+            <button
+              onClick={() => exportDashboardPDF(exportData)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+            <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
             {quickActions.map((action) => (
               <button
                 key={action.label}
