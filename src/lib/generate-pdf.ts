@@ -515,8 +515,8 @@ export const generateEnneagramPDF = (
 
   // Health Level detail
   if (s.nivel_saude && (level === "intermediario" || level === "completo")) {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Nível de Saúde: ${result.type_1_name}`);
     text(s.nivel_saude, 9, C.darkPurple);
   }
