@@ -440,8 +440,8 @@ export const generateEnneagramPDF = (
 
   // Dominant Profile
   if (s.perfil_dominante && (level === "intermediario" || level === "completo")) {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Seu Perfil Dominante: ${result.type_1_name}`);
     text(s.perfil_dominante, 9, C.darkPurple);
   }
