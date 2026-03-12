@@ -504,12 +504,11 @@ export const generateEnneagramPDF = (
 
   // Stress (completo only)
   if (s.estresse && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Pontos de Estresse: ${result.type_1_name}`);
     if (result.disintegration_direction) {
       text(`Estressa como: ${result.disintegration_direction}`, 10, C.red, true);
-      y += 2;
     }
     text(s.estresse, 9, C.darkPurple);
   }
