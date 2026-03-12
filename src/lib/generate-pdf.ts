@@ -577,29 +577,7 @@ export const generateEnneagramPDF = (
     }
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // ACTION PLAN (blank page)
-  // ═══════════════════════════════════════════════════════════
-  if (level === "completo") {
-    newPage();
-    headerLine();
-    sectionBanner("PLANO DE AÇÃO");
-    text("O relatório que está em suas mãos é uma ferramenta que irá ajudá-lo(a) a evoluir e conquistar seus objetivos. Aproveite as próximas linhas para criar suas ações e prazos.", 9, C.gray);
-    y += 4;
 
-    for (let i = 1; i <= 3; i++) {
-      check(30);
-      sectionTitle(`Ação ${i}`);
-      field("Motivo da Ação:", "");
-      y += 4;
-      doc.setDrawColor(...col(C.lightGray));
-      doc.line(m + 50, y - 4, pw - m, y - 4);
-      field("Prazo:", "");
-      y += 2;
-      doc.line(m + 50, y - 2, pw - m, y - 2);
-      y += 4;
-    }
-  }
 
   // ═══════════════════════════════════════════════════════════
   // BONUS: Relationship Tips (completo only)
