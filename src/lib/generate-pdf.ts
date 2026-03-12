@@ -478,8 +478,8 @@ export const generateEnneagramPDF = (
 
   // Wings influence (completo only)
   if (s.influencia_asas && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Influência das Asas no perfil ${result.type_1_name}`);
     text(s.influencia_asas, 9, C.darkPurple);
   }
