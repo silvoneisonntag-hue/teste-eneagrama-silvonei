@@ -85,12 +85,6 @@ const Index = () => {
                     </Button>
                   </Link>
                 )}
-                <Link to="/history">
-                  <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-primary">
-                    <History className="w-4 h-4" />
-                    Histórico
-                  </Button>
-                </Link>
                 <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground font-body hover:text-primary">
                   <LogOut className="w-4 h-4" />
                   Sair
