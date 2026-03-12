@@ -233,9 +233,9 @@ export const generateEnneagramPDF = (
     for (const line of lines) {
       check(4);
       doc.text(line, m + 8, y);
-      y += 4;
+      y += 3.8;
     }
-    y += 1;
+    y += 0.5;
   };
 
   const userName = result.profiles?.display_name || "Não informado";
