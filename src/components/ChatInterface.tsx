@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
-import { Send, RotateCcw, ArrowLeft, Info } from "lucide-react";
+import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
@@ -22,6 +22,8 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [autoSaved, setAutoSaved] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -288,6 +290,56 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
   };
 
+  const toggleRecording = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.");
+      return;
+    }
+
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "pt-BR";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognitionRef.current = recognition;
+
+    let finalTranscript = "";
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + " ";
+        } else {
+          interim = transcript;
+        }
+      }
+      setInput(finalTranscript + interim);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      if (event.error === "not-allowed") {
+        toast.error("Permissão de microfone negada. Habilite nas configurações do navegador.");
+      }
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+    setIsRecording(true);
+  };
+
   // Check if the interview seems finished - require enough messages AND final result indicators
   const lastMsg = messages[messages.length - 1];
   const hasEnoughMessages = messages.filter(m => m.role === "user").length >= 10;
@@ -432,6 +484,16 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
               target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
             }}
           />
+          <Button
+            variant={isRecording ? "destructive" : "ghost"}
+            size="icon"
+            onClick={toggleRecording}
+            disabled={isLoading}
+            className={`rounded-xl h-12 w-12 shrink-0 ${isRecording ? "animate-pulse" : "text-muted-foreground hover:text-foreground"}`}
+            title={isRecording ? "Parar gravação" : "Gravar áudio"}
+          >
+            {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </Button>
           <Button
             variant="hero"
             size="icon"
