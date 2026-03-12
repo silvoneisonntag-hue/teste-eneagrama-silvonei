@@ -163,9 +163,8 @@ export const generateEnneagramPDF = (
     for (const line of lines) {
       check(size * 0.45);
       doc.text(line, m + xOffset, y);
-      y += size * 0.42;
+      y += size * 0.4;
     }
-    y += 1;
   };
 
   const centeredText = (t: string, size: number, color: Color = C.darkPurple, bold = true) => {
