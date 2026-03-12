@@ -566,7 +566,7 @@ export const generateEnneagramPDF = (
     headerLine();
     sectionBanner("INSIGHTS E ANOTAÇÕES");
     text("Este espaço foi pensado para ser o seu refúgio de reflexões ao longo desta jornada de autoconhecimento. Use-o para registrar os insights mais marcantes que você descobriu sobre si mesmo, as reflexões que tocaram seu coração e as ideias que deseja levar adiante.", 9, C.gray);
-    y += 6;
+    y += 4;
     // Draw lines for writing
     for (let i = 0; i < 14; i++) {
       check(8);
