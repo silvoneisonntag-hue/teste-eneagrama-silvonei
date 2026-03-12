@@ -163,9 +163,8 @@ export const generateEnneagramPDF = (
     for (const line of lines) {
       check(size * 0.45);
       doc.text(line, m + xOffset, y);
-      y += size * 0.42;
+      y += size * 0.4;
     }
-    y += 1;
   };
 
   const centeredText = (t: string, size: number, color: Color = C.darkPurple, bold = true) => {
@@ -178,38 +177,37 @@ export const generateEnneagramPDF = (
 
   const sectionBanner = (title: string) => {
     check(18);
-    y += 4;
-    // Gold background banner
+    y += 2;
     doc.setFillColor(...col(C.goldBg));
     doc.roundedRect(m, y - 5, cw, 12, 2, 2, "F");
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...col(C.goldDark));
     doc.text(title, pw / 2, y + 2, { align: "center" });
-    y += 14;
+    y += 11;
   };
 
   const sectionTitle = (title: string) => {
     check(14);
-    y += 3;
+    y += 2;
     doc.setDrawColor(...col(C.gold));
     doc.setLineWidth(0.8);
     doc.line(m, y, m + 25, y);
-    y += 5;
+    y += 4;
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...col(C.darkPurple));
     doc.text(title, m, y);
-    y += 7;
+    y += 5;
   };
 
   const separator = () => {
     check(6);
-    y += 2;
+    y += 1;
     doc.setDrawColor(...col(C.lightGray));
     doc.setLineWidth(0.3);
     doc.line(m, y, pw - m, y);
-    y += 4;
+    y += 3;
   };
 
   const field = (label: string, value: string) => {
@@ -235,9 +233,9 @@ export const generateEnneagramPDF = (
     for (const line of lines) {
       check(4);
       doc.text(line, m + 8, y);
-      y += 4;
+      y += 3.8;
     }
-    y += 1;
+    y += 0.5;
   };
 
   const userName = result.profiles?.display_name || "Não informado";
@@ -335,7 +333,6 @@ export const generateEnneagramPDF = (
     sectionBanner("Os Nove Tipos de Personalidade");
 
     text("No centro do Eneagrama estão os nove tipos de personalidade, cada um com uma essência única, moldada por motivações e medos profundos. Os tipos são agrupados em três centros: instintivo (Tipos 8, 9, 1), emocional (Tipos 2, 3, 4) e mental (Tipos 5, 6, 7).", 9, C.darkPurple);
-    y += 2;
 
     for (const t of NINE_TYPES_TEXT) {
       bullet(t, C.darkPurple, C.gold);
@@ -443,8 +440,8 @@ export const generateEnneagramPDF = (
 
   // Dominant Profile
   if (s.perfil_dominante && (level === "intermediario" || level === "completo")) {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Seu Perfil Dominante: ${result.type_1_name}`);
     text(s.perfil_dominante, 9, C.darkPurple);
   }
@@ -458,8 +455,8 @@ export const generateEnneagramPDF = (
 
   // Motivations & Fears (completo only)
   if (s.motivacoes_medos && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Motivações e Medos: ${result.type_1_name}`);
     text(s.motivacoes_medos, 9, C.darkPurple);
   }
@@ -473,16 +470,16 @@ export const generateEnneagramPDF = (
 
   // Team & Conflicts (completo only)
   if (s.equipe_conflitos && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Como age em equipe e lida com conflitos`);
     text(s.equipe_conflitos, 9, C.darkPurple);
   }
 
   // Wings influence (completo only)
   if (s.influencia_asas && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Influência das Asas no perfil ${result.type_1_name}`);
     text(s.influencia_asas, 9, C.darkPurple);
   }
@@ -496,32 +493,30 @@ export const generateEnneagramPDF = (
 
   // Integration (completo only)
   if (s.integracao && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Pontos de Integração: ${result.type_1_name}`);
     if (result.integration_direction) {
       text(`Integra com: ${result.integration_direction}`, 10, C.green, true);
-      y += 2;
     }
     text(s.integracao, 9, C.darkPurple);
   }
 
   // Stress (completo only)
   if (s.estresse && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Pontos de Estresse: ${result.type_1_name}`);
     if (result.disintegration_direction) {
       text(`Estressa como: ${result.disintegration_direction}`, 10, C.red, true);
-      y += 2;
     }
     text(s.estresse, 9, C.darkPurple);
   }
 
   // Health Level detail
   if (s.nivel_saude && (level === "intermediario" || level === "completo")) {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner(`Nível de Saúde: ${result.type_1_name}`);
     text(s.nivel_saude, 9, C.darkPurple);
   }
@@ -533,7 +528,6 @@ export const generateEnneagramPDF = (
     for (const skill of s.habilidades_naturais) {
       bullet(skill, C.darkPurple, C.green);
     }
-    y += 2;
   }
 
   if (s.habilidades_desenvolver?.length && (level === "intermediario" || level === "completo")) {
@@ -542,16 +536,14 @@ export const generateEnneagramPDF = (
     for (const skill of s.habilidades_desenvolver) {
       bullet(skill, C.darkPurple, C.orange);
     }
-    y += 2;
   }
 
   // Reflection questions (completo only)
   if (s.reflexao?.length && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner("REFLITA UM POUCO");
     text(`Como ${result.type_1_name.split(" - ")[0] || result.type_1_name}, estas perguntas o convidarão a explorar sua jornada:`, 9, C.gray);
-    y += 2;
     for (const q of s.reflexao) {
       bullet(q, C.darkPurple, C.purple);
     }
@@ -559,8 +551,8 @@ export const generateEnneagramPDF = (
 
   // Full analysis from summary (completo only)
   if (result.summary && level === "completo") {
-    newPage();
-    headerLine();
+    check(40);
+    separator();
     sectionBanner("ANÁLISE COMPLETA");
     const cleanSummary = result.summary.replace(/[#*_`]/g, "");
     text(cleanSummary, 9, C.darkPurple);
@@ -574,7 +566,7 @@ export const generateEnneagramPDF = (
     headerLine();
     sectionBanner("INSIGHTS E ANOTAÇÕES");
     text("Este espaço foi pensado para ser o seu refúgio de reflexões ao longo desta jornada de autoconhecimento. Use-o para registrar os insights mais marcantes que você descobriu sobre si mesmo, as reflexões que tocaram seu coração e as ideias que deseja levar adiante.", 9, C.gray);
-    y += 6;
+    y += 4;
     // Draw lines for writing
     for (let i = 0; i < 14; i++) {
       check(8);
@@ -585,29 +577,7 @@ export const generateEnneagramPDF = (
     }
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // ACTION PLAN (blank page)
-  // ═══════════════════════════════════════════════════════════
-  if (level === "completo") {
-    newPage();
-    headerLine();
-    sectionBanner("PLANO DE AÇÃO");
-    text("O relatório que está em suas mãos é uma ferramenta que irá ajudá-lo(a) a evoluir e conquistar seus objetivos. Aproveite as próximas linhas para criar suas ações e prazos.", 9, C.gray);
-    y += 4;
 
-    for (let i = 1; i <= 3; i++) {
-      check(30);
-      sectionTitle(`Ação ${i}`);
-      field("Motivo da Ação:", "");
-      y += 4;
-      doc.setDrawColor(...col(C.lightGray));
-      doc.line(m + 50, y - 4, pw - m, y - 4);
-      field("Prazo:", "");
-      y += 2;
-      doc.line(m + 50, y - 2, pw - m, y - 2);
-      y += 4;
-    }
-  }
 
   // ═══════════════════════════════════════════════════════════
   // BONUS: Relationship Tips (completo only)
