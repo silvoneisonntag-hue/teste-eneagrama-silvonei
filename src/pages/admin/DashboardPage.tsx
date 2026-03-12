@@ -11,6 +11,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { exportDashboardCSV, exportDashboardPDF } from "@/lib/export-dashboard";
 
 const COLORS = [
   "#7c3aed", "#eab308", "#3b82f6", "#ef4444",
@@ -116,6 +117,21 @@ const DashboardPage = () => {
     { label: "Nota Média", value: stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "—", icon: Star, color: "bg-amber-100 text-amber-600", suffix: stats.avgRating > 0 ? "/5" : "" },
   ];
 
+  const exportData = {
+    profileName,
+    totalResults: stats.totalResults,
+    uniqueClients: stats.uniqueClients,
+    feedbackCount: stats.feedbackCount,
+    avgRating: stats.avgRating,
+    typeDistribution: stats.typeDistribution,
+    subtypeDistribution: stats.subtypeDistribution,
+    recentResults: stats.recentResults.map((r) => ({
+      clientName: profilesMap[r.user_id] || "Usuário",
+      typeName: r.type_1_name,
+      date: new Date(r.created_at).toLocaleDateString("pt-BR"),
+    })),
+  };
+
   const quickActions = [
     { label: "Novo Cliente", icon: UserPlus, onClick: () => navigate("/admin/clientes"), color: "bg-violet-600 hover:bg-violet-700 text-white" },
     { label: "Ver Relatórios", icon: BarChart3, onClick: () => navigate("/admin/relatorios"), color: "bg-blue-600 hover:bg-blue-700 text-white" },
@@ -135,7 +151,22 @@ const DashboardPage = () => {
               Aqui está o resumo da sua plataforma
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => exportDashboardCSV(exportData)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">CSV</span>
+            </button>
+            <button
+              onClick={() => exportDashboardPDF(exportData)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+            <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
             {quickActions.map((action) => (
               <button
                 key={action.label}
