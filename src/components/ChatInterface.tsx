@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
-import { Send, RotateCcw, ArrowLeft, Info } from "lucide-react";
+import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
