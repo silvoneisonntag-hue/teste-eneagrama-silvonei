@@ -22,6 +22,8 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [autoSaved, setAutoSaved] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
