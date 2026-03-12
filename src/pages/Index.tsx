@@ -125,9 +125,7 @@ const Index = () => {
                 <span className="text-primary text-glow">Eneagrama</span>
               </h1>
               <p className="text-muted-foreground font-body text-lg leading-relaxed max-w-md mb-8">
-                Uma entrevista adaptativa conduzida por inteligência artificial
-                para revelar seus padrões de personalidade, motivações e medos
-                mais profundos.
+                Uma entrevista adaptativa e profunda criada para revelar seus padrões de personalidade, motivações e medos mais profundos.
               </p>
               <Alert className="mb-6 border-2 border-primary bg-primary/20 max-w-md shadow-[0_0_30px_hsl(43_80%_55%_/_0.25)] rounded-xl">
                 <Info className="w-5 h-5 text-primary !mt-0 flex-shrink-0" />
