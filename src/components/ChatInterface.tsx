@@ -312,8 +312,11 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
 
     if (isRecording && recognitionRef.current) {
+      setIsProcessingAudio(true);
       recognitionRef.current.stop();
       setIsRecording(false);
+      // Brief processing indicator then clear
+      setTimeout(() => setIsProcessingAudio(false), 800);
       return;
     }
 
