@@ -24,6 +24,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const [started, setStarted] = useState(false);
   const [autoSaved, setAutoSaved] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [micError, setMicError] = useState<"not-supported" | "not-allowed" | null>(null);
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
