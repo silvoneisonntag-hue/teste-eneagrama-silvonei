@@ -351,6 +351,8 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     recognition.onend = () => {
       setIsRecording(false);
+      // If still processing, clear after a moment
+      setTimeout(() => setIsProcessingAudio(false), 600);
     };
 
     recognition.start();
