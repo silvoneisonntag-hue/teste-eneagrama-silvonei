@@ -421,6 +421,9 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
         </div>
       </div>
 
+      {/* Progress Bar */}
+      <InterviewProgress currentPhase={currentPhase} />
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {/* Fixed disclaimer card */}
