@@ -1,11 +1,11 @@
 import { Check } from "lucide-react";
 
 const PHASES = [
-  { key: "exploracao", label: "Exploração" },
-  { key: "questionario-tipo", label: "Tipo" },
-  { key: "questionario-instinto", label: "Instinto" },
-  { key: "confirmacao", label: "Confirmação" },
-  { key: "resultado", label: "Resultado" },
+  { key: "exploracao", label: "Exploração", short: "Explor." },
+  { key: "questionario-tipo", label: "Tipo", short: "Tipo" },
+  { key: "questionario-instinto", label: "Instinto", short: "Inst." },
+  { key: "confirmacao", label: "Confirmação", short: "Conf." },
+  { key: "resultado", label: "Resultado", short: "Result." },
 ] as const;
 
 interface InterviewProgressProps {
@@ -13,48 +13,61 @@ interface InterviewProgressProps {
 }
 
 const InterviewProgress = ({ currentPhase }: InterviewProgressProps) => {
-  return (
-    <div className="flex items-center gap-1 px-4 py-2.5 bg-muted/40 border-b border-border overflow-x-auto">
-      {PHASES.map((phase, i) => {
-        const isCompleted = i < currentPhase;
-        const isCurrent = i === currentPhase;
+  const progress = ((currentPhase) / (PHASES.length - 1)) * 100;
 
-        return (
-          <div key={phase.key} className="flex items-center min-w-0">
-            {i > 0 && (
-              <div
-                className={`w-4 sm:w-6 h-0.5 shrink-0 transition-colors ${
-                  isCompleted ? "bg-primary" : "bg-border"
-                }`}
-              />
-            )}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
-                  isCompleted
-                    ? "bg-primary text-primary-foreground"
-                    : isCurrent
-                    ? "bg-primary/20 text-primary ring-2 ring-primary/50"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {isCompleted ? <Check className="w-3 h-3" /> : i + 1}
-              </div>
-              <span
-                className={`text-[11px] font-medium whitespace-nowrap transition-colors ${
-                  isCurrent
-                    ? "text-primary"
-                    : isCompleted
-                    ? "text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {phase.label}
-              </span>
+  return (
+    <div className="px-3 sm:px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-sm">
+      {/* Progress bar track */}
+      <div className="relative h-1 rounded-full bg-muted mb-1.5">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-500"
+          style={{ width: `${progress}%` }}
+        />
+        {/* Phase dots on the track */}
+        {PHASES.map((_, i) => {
+          const left = (i / (PHASES.length - 1)) * 100;
+          const isCompleted = i < currentPhase;
+          const isCurrent = i === currentPhase;
+          return (
+            <div
+              key={i}
+              className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2 transition-all ${
+                isCompleted
+                  ? "bg-primary border-primary"
+                  : isCurrent
+                  ? "bg-primary/30 border-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]"
+                  : "bg-muted border-border"
+              }`}
+              style={{ left: `${left}%`, transform: "translate(-50%, -50%)" }}
+            >
+              {isCompleted && <Check className="w-1.5 h-1.5 text-primary-foreground absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
+      {/* Labels */}
+      <div className="flex justify-between">
+        {PHASES.map((phase, i) => {
+          const isCurrent = i === currentPhase;
+          const isCompleted = i < currentPhase;
+          return (
+            <span
+              key={phase.key}
+              className={`text-[9px] sm:text-[10px] font-medium transition-colors text-center ${
+                isCurrent
+                  ? "text-primary font-bold"
+                  : isCompleted
+                  ? "text-foreground/70"
+                  : "text-muted-foreground/50"
+              }`}
+              style={{ width: `${100 / PHASES.length}%` }}
+            >
+              <span className="hidden sm:inline">{phase.label}</span>
+              <span className="sm:hidden">{phase.short}</span>
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 };
