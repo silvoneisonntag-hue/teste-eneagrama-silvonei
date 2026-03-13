@@ -295,7 +295,12 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const toggleRecording = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error("Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.");
+      setMicError("not-supported");
+      return;
+    }
+
+    if (micError) {
+      setMicError(null);
       return;
     }
 
@@ -329,7 +334,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
       if (event.error === "not-allowed") {
-        toast.error("Permissão de microfone negada. Habilite nas configurações do navegador.");
+        setMicError("not-allowed");
       }
       setIsRecording(false);
     };
