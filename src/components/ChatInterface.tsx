@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
-import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff } from "lucide-react";
+import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff, X, Settings } from "lucide-react";
 import InterviewProgress from "@/components/InterviewProgress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const [started, setStarted] = useState(false);
   const [autoSaved, setAutoSaved] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [micError, setMicError] = useState<"not-supported" | "not-allowed" | null>(null);
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -294,7 +295,12 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const toggleRecording = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error("Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.");
+      setMicError("not-supported");
+      return;
+    }
+
+    if (micError) {
+      setMicError(null);
       return;
     }
 
@@ -328,7 +334,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
       if (event.error === "not-allowed") {
-        toast.error("Permissão de microfone negada. Habilite nas configurações do navegador.");
+        setMicError("not-allowed");
       }
       setIsRecording(false);
     };
@@ -483,6 +489,50 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Mic permission help banner */}
+      {micError && (
+        <div className="border-t border-border px-4 py-3">
+          <div className="max-w-3xl mx-auto rounded-xl bg-destructive/10 border border-destructive/30 p-3 relative">
+            <button
+              onClick={() => setMicError(null)}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            {micError === "not-supported" ? (
+              <div className="pr-6">
+                <p className="text-sm font-semibold text-destructive flex items-center gap-1.5 mb-1">
+                  <MicOff className="w-4 h-4" /> Navegador não suportado
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Seu navegador não suporta reconhecimento de voz. Use <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong>.
+                </p>
+              </div>
+            ) : (
+              <div className="pr-6">
+                <p className="text-sm font-semibold text-destructive flex items-center gap-1.5 mb-2">
+                  <MicOff className="w-4 h-4" /> Microfone bloqueado
+                </p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Para usar o recurso de voz, habilite o microfone:
+                </p>
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  <p className="flex items-start gap-1.5">
+                    <Settings className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                    <span><strong>Chrome/Edge:</strong> Toque no ícone de cadeado 🔒 ao lado da URL → Permissões → Microfone → Permitir</span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <Settings className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                    <span><strong>Safari (iPhone):</strong> Toque em "aA" na barra de endereço → Configurações do Site → Microfone → Permitir</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 mt-1">Após habilitar, recarregue a página e tente novamente.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="border-t border-border px-4 py-4">
         <div className="flex items-end gap-3 max-w-3xl mx-auto">
@@ -502,12 +552,18 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
             }}
           />
           <Button
-            variant={isRecording ? "destructive" : "ghost"}
+            variant={isRecording ? "destructive" : micError ? "outline" : "ghost"}
             size="icon"
             onClick={toggleRecording}
             disabled={isLoading}
-            className={`rounded-xl h-12 w-12 shrink-0 ${isRecording ? "animate-pulse" : "text-muted-foreground hover:text-foreground"}`}
-            title={isRecording ? "Parar gravação" : "Gravar áudio"}
+            className={`rounded-xl h-12 w-12 shrink-0 ${
+              isRecording
+                ? "animate-pulse"
+                : micError
+                ? "border-destructive/50 text-destructive"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            title={isRecording ? "Parar gravação" : micError ? "Ver instruções do microfone" : "Gravar áudio"}
           >
             {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           </Button>
