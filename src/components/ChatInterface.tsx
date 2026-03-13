@@ -75,6 +75,12 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Stop recording and clear transcript before sending
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+
     const userMsg: Message = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
