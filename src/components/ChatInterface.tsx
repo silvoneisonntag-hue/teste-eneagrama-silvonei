@@ -564,20 +564,32 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
             }}
           />
           <Button
-            variant={isRecording ? "destructive" : micError ? "outline" : "ghost"}
+            variant={isRecording ? "destructive" : isProcessingAudio ? "secondary" : micError ? "outline" : "ghost"}
             size="icon"
             onClick={toggleRecording}
-            disabled={isLoading}
-            className={`rounded-xl h-12 w-12 shrink-0 ${
+            disabled={isLoading || isProcessingAudio}
+            className={`rounded-xl h-12 w-12 shrink-0 transition-all ${
               isRecording
                 ? "animate-pulse"
+                : isProcessingAudio
+                ? "opacity-80"
                 : micError
                 ? "border-destructive/50 text-destructive"
                 : "text-muted-foreground hover:text-foreground"
             }`}
-            title={isRecording ? "Parar gravação" : micError ? "Ver instruções do microfone" : "Gravar áudio"}
+            title={isRecording ? "Parar gravação" : isProcessingAudio ? "Processando áudio..." : micError ? "Ver instruções do microfone" : "Gravar áudio"}
           >
-            {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {isProcessingAudio ? (
+              <div className="flex gap-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            ) : isRecording ? (
+              <MicOff className="w-5 h-5" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
           </Button>
           <Button
             variant="hero"
