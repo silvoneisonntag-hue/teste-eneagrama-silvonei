@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
 import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff } from "lucide-react";
+import InterviewProgress from "@/components/InterviewProgress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { streamChat, type Message } from "@/lib/chat-stream";
@@ -340,20 +341,33 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     setIsRecording(true);
   };
 
-  // Check if the interview seems finished - require enough messages AND final result indicators
+  // Detect current interview phase based on messages
+  const userMsgCount = messages.filter(m => m.role === "user").length;
+  const allText = messages.map(m => m.content).join("\n");
+  const hasTypeQuestionnaire = /Bloco\s*[12]/i.test(allText) || /A1[:\s]/i.test(allText);
+  const hasInstinctQuestionnaire = /Preservação|instinto/i.test(allText) && /nota de 0 a 10/i.test(allText);
+
   const lastMsg = messages[messages.length - 1];
-  const hasEnoughMessages = messages.filter(m => m.role === "user").length >= 10;
+  const hasEnoughMessages = userMsgCount >= 10;
   const interviewDone =
     !isLoading &&
     hasEnoughMessages &&
     lastMsg?.role === "assistant" &&
     (
-      // Must contain percentage-like result indicators
       (/Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.toLowerCase().includes("tipo mais provável")) ||
-      // Or explicit final analysis markers with percentages somewhere in conversation
       (lastMsg.content.toLowerCase().includes("análise final") && /\d+%/.test(lastMsg.content)) ||
       (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content))
     );
+
+  const currentPhase = interviewDone
+    ? 4
+    : hasInstinctQuestionnaire
+    ? 2
+    : hasTypeQuestionnaire
+    ? 1
+    : userMsgCount >= 25
+    ? 3
+    : 0;
 
   // Auto-save when interview is done
   useEffect(() => {
@@ -406,6 +420,9 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
           </Button>
         </div>
       </div>
+
+      {/* Progress Bar */}
+      <InterviewProgress currentPhase={currentPhase} />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
