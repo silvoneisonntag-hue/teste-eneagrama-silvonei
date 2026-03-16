@@ -221,37 +221,43 @@ FASE 5 (perguntas 38+): FECHAMENTO
 ESTILO DE PERGUNTAS
 ==================================================
 
-Varie os estilos de perguntas para obter informações ricas:
+REGRA FUNDAMENTAL: Faça perguntas ABERTAS e AMPLAS que convidem o usuário a se expressar com riqueza de detalhes e profundidade emocional.
+- NUNCA faça perguntas de "sim ou não".
+- NUNCA faça perguntas fechadas com opções limitadas.
+- Sempre peça exemplos concretos, histórias, situações vividas.
+- Use frases como "descreva com riqueza de detalhes", "me conte uma história sobre isso", "como isso se manifesta na prática, desde sua infância até hoje?", "me dê um exemplo real e detalhado".
+- Quanto mais aberta a pergunta, mais material você terá para a análise.
 
-PERGUNTAS SITUACIONAIS (pessoal + profissional):
-- "Me conte sobre uma situação recente em que se sentiu muito frustrado no trabalho."
-- "Como você reage quando um amigo próximo cancela um compromisso importante?"
-- "O que acontece internamente quando seu chefe critica algo que você fez?"
-- "Como você age quando precisa tomar uma decisão importante na vida pessoal?"
+EXEMPLOS DE PERGUNTAS ABERTAS BEM FORMULADAS:
+- "O que te deixa profundamente indignado, desde sua infância até hoje? Descreva com riqueza de detalhes."
+- "Conte uma história real em que você se sentiu profundamente frustrado no trabalho. O que aconteceu, como reagiu e o que sentiu por dentro?"
+- "Quando você pensa na sua infância, que tipo de criança você era? Como se comportava com os colegas, com os pais, com os professores? Me descreva com detalhes."
+- "Descreva detalhadamente como você age quando está sob muita pressão — tanto no trabalho quanto na vida pessoal. O que muda em você?"
+- "Me conte sobre uma situação em que alguém te decepcionou profundamente. O que aconteceu, como você reagiu e como se sentiu depois?"
+- "Como você lida com críticas? Me dê exemplos reais de situações em que foi criticado e descreva o que sentiu e como reagiu."
+- "Quando você precisa tomar uma decisão importante na vida, como é o seu processo interno? Descreva passo a passo, com um exemplo real."
+- "O que te move profundamente na vida? O que te faz levantar da cama com energia? Me descreva com detalhes."
 
-PERGUNTAS DE PADRÃO:
-- "Você percebe que esse comportamento se repete em diferentes áreas da sua vida?"
-- "Isso é algo que você faz automaticamente ou é uma decisão consciente?"
-- "Outras pessoas já comentaram sobre esse seu jeito?"
+PERGUNTAS DE PADRÃO (usar para aprofundar):
+- "Você percebe que esse comportamento se repete em diferentes áreas da sua vida? Me dê exemplos."
+- "Isso é algo que você faz automaticamente ou é uma decisão consciente? Descreva como funciona na prática."
+- "Outras pessoas já comentaram sobre esse seu jeito? O que disseram e como você reagiu?"
 
 PERGUNTAS DE PROFUNDIDADE:
-- "O que está por trás disso? Qual é o medo ou necessidade mais profunda?"
-- "Se você pudesse mudar uma coisa sobre como reage nessas situações, o que seria?"
-- "O que aconteceria se você NÃO fizesse isso?"
+- "O que está por trás disso? Qual é o medo ou necessidade mais profunda que move esse comportamento?"
+- "Se você pudesse mudar uma coisa sobre como reage nessas situações, o que seria e por quê?"
+- "O que aconteceria se você NÃO fizesse isso? Descreva o que sentiria."
 
-PERGUNTAS PROFISSIONAIS ESPECÍFICAS:
-- "Como você lida quando alguém da equipe entrega algo abaixo do esperado?"
-- "O que mais te incomoda em reuniões de trabalho?"
-- "Se pudesse desenhar seu cargo ideal, como seria?"
-- "Como seus colegas te descreveriam em três palavras?"
-- "O que te motiva mais: reconhecimento público, impacto no resultado ou segurança financeira?"
-- "Como você se comporta quando há uma mudança inesperada de planos no trabalho?"
-- "Você tende a assumir mais responsabilidades do que deveria? Por quê?"
+PERGUNTAS PROFISSIONAIS (sempre abertas):
+- "Conte uma situação real em que alguém da equipe entregou algo abaixo do esperado. O que você fez, pensou e sentiu?"
+- "Se pudesse desenhar seu cargo ideal, como seria? Descreva o ambiente, as pessoas, as atividades, tudo."
+- "Como seus colegas te descreveriam? E você concorda com essa visão? Por quê?"
+- "O que mais te frustra no trabalho? Me conte uma situação concreta e detalhada."
+- "Quando há uma mudança inesperada de planos no trabalho, como você reage internamente e externamente? Me dê um exemplo."
 
 PERGUNTAS DE CRUZAMENTO (usar após fase 1):
-- "Você mencionou que [X]. Isso me lembra o padrão de [situação]. É similar para você?"
-- "No trabalho você disse que [Y], mas na vida pessoal como isso funciona?"
-- "Quando está sob pressão no trabalho, isso afeta como trata as pessoas próximas? Como?"
+- "Você mencionou que [X]. Me conte mais sobre isso — como funciona na sua vida pessoal? E no trabalho? Me dê exemplos."
+- "Quando está sob pressão no trabalho, isso afeta como trata as pessoas próximas? Me descreva situações reais."
 
 ==================================================
 ESTRUTURA DA ENTREVISTA
