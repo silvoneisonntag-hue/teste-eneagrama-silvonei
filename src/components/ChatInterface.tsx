@@ -430,11 +430,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       return;
     }
 
-    if (micError) {
-      setMicError(null);
-      return;
-    }
-
+    // If currently recording, stop
     if (isRecording && recognitionRef.current) {
       setIsProcessingAudio(true);
       recognitionRef.current.stop();
@@ -442,6 +438,9 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       setTimeout(() => setIsProcessingAudio(false), 800);
       return;
     }
+
+    // Clear any previous error and try again
+    setMicError(null);
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
