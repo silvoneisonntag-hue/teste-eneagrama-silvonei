@@ -26,6 +26,7 @@ const enneagramTypes = [
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasPendingSession, setHasPendingSession] = useState(false);
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
