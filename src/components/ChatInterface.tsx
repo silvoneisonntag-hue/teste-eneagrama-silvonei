@@ -31,6 +31,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const localSessionKey = user ? `interview_session_${user.id}` : null;
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,12 +41,26 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // ── Persist conversation to DB ──
+  // ── Persist conversation to DB + local backup ──
   const persistSession = useCallback(async (msgs: Message[], completed = false) => {
     if (!user || msgs.length === 0) return;
 
+    const payload = JSON.parse(JSON.stringify(msgs)) as Json;
+    const nowIso = new Date().toISOString();
+
     try {
-      const payload = JSON.parse(JSON.stringify(msgs)) as Json;
+      if (localSessionKey) {
+        localStorage.setItem(localSessionKey, JSON.stringify({
+          messages: msgs,
+          is_completed: completed,
+          updated_at: nowIso,
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to save session locally:", e);
+    }
+
+    try {
       const { error } = await supabase
         .from("interview_sessions")
         .upsert(
@@ -53,7 +68,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
             user_id: user.id,
             messages: payload,
             is_completed: completed,
-            updated_at: new Date().toISOString(),
+            updated_at: nowIso,
           },
           { onConflict: "user_id" },
         );
@@ -64,7 +79,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     } catch (e) {
       console.error("Failed to persist session:", e);
     }
-  }, [user]);
+  }, [user, localSessionKey]);
 
   // Save session continuously while interview is in progress
   useEffect(() => {
@@ -103,30 +118,69 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     };
   }, [messages, started, user, autoSaved, persistSession]);
 
-  // ── Restore session on mount ──
+  // ── Restore session on mount (local backup first, DB second) ──
   useEffect(() => {
     if (!user || restoredSession) return;
-    const restore = async () => {
-      const { data } = await supabase
-        .from("interview_sessions")
-        .select("messages, is_completed")
-        .eq("user_id", user.id)
-        .maybeSingle();
 
-      if (data && !data.is_completed && Array.isArray(data.messages) && (data.messages as any[]).length > 0) {
-        setMessages(data.messages as Message[]);
-        setStarted(true);
+    const restore = async () => {
+      let localCount = 0;
+
+      try {
+        if (localSessionKey) {
+          const localRaw = localStorage.getItem(localSessionKey);
+          if (localRaw) {
+            const localData = JSON.parse(localRaw);
+            if (!localData?.is_completed && Array.isArray(localData?.messages) && localData.messages.length > 0) {
+              localCount = localData.messages.length;
+              setMessages(localData.messages as Message[]);
+              setStarted(true);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to restore local session:", e);
       }
-      setRestoredSession(true);
+
+      try {
+        const { data, error } = await supabase
+          .from("interview_sessions")
+          .select("messages, is_completed")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Failed to restore session from DB:", error.message);
+        }
+
+        if (data?.is_completed) {
+          if (localSessionKey) localStorage.removeItem(localSessionKey);
+        } else if (data && Array.isArray(data.messages) && (data.messages as any[]).length > 0) {
+          const dbMessages = data.messages as Message[];
+          if (dbMessages.length >= localCount) {
+            setMessages(dbMessages);
+            setStarted(true);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to restore session from DB:", e);
+      } finally {
+        setRestoredSession(true);
+      }
     };
-    restore();
-  }, [user, restoredSession]);
+
+    void restore();
+  }, [user, restoredSession, localSessionKey]);
 
   // ── Clear session after result saved ──
   const clearSession = useCallback(async () => {
     if (!user) return;
+
+    if (localSessionKey) {
+      localStorage.removeItem(localSessionKey);
+    }
+
     await supabase.from("interview_sessions").delete().eq("user_id", user.id);
-  }, [user]);
+  }, [user, localSessionKey]);
 
   const startInterview = async () => {
     setStarted(true);
@@ -423,7 +477,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
   };
 
-  const toggleRecording = async () => {
+  const toggleRecording = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setMicError("not-supported");
@@ -439,23 +493,8 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       return;
     }
 
-    // Clear any previous error
+    // Clear any previous error and try again immediately
     setMicError(null);
-
-    // Pre-check microphone permission via getUserMedia before starting SpeechRecognition
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Permission granted — release the stream immediately
-      stream.getTracks().forEach(track => track.stop());
-    } catch (err: any) {
-      console.error("Microphone permission error:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setMicError("not-allowed");
-      } else {
-        setMicError("not-supported");
-      }
-      return;
-    }
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
@@ -479,12 +518,17 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     };
 
     recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
-      // Only show banner for permission errors, not transient ones like "network" or "aborted"
-      if (event.error === "not-allowed") {
+      const errorCode = String(event.error || "unknown");
+      console.error("Speech recognition error:", errorCode);
+
+      if (["not-allowed", "service-not-allowed", "audio-capture"].includes(errorCode)) {
         setMicError("not-allowed");
+      } else if (["language-not-supported", "bad-grammar"].includes(errorCode)) {
+        setMicError("not-supported");
       }
+
       setIsRecording(false);
+      setIsProcessingAudio(false);
     };
 
     recognition.onend = () => {
@@ -498,6 +542,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     } catch (e) {
       console.error("Failed to start recognition:", e);
       setIsRecording(false);
+      setMicError("not-supported");
     }
   };
 
@@ -549,6 +594,15 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       autoSaveResults();
     }
   }, [interviewDone, autoSaved]);
+
+  if (!restoredSession) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+        <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+        <p className="text-sm font-body text-muted-foreground">Restaurando sua conversa...</p>
+      </div>
+    );
+  }
 
   if (!started) {
     return (
