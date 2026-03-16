@@ -177,6 +177,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     const userMsg: Message = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
+    void persistSession(newMessages);
     setInput("");
     setIsLoading(true);
 
