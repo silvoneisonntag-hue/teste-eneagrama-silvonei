@@ -31,6 +31,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const localSessionKey = user ? `interview_session_${user.id}` : null;
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,12 +41,26 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // ── Persist conversation to DB ──
+  // ── Persist conversation to DB + local backup ──
   const persistSession = useCallback(async (msgs: Message[], completed = false) => {
     if (!user || msgs.length === 0) return;
 
+    const payload = JSON.parse(JSON.stringify(msgs)) as Json;
+    const nowIso = new Date().toISOString();
+
     try {
-      const payload = JSON.parse(JSON.stringify(msgs)) as Json;
+      if (localSessionKey) {
+        localStorage.setItem(localSessionKey, JSON.stringify({
+          messages: msgs,
+          is_completed: completed,
+          updated_at: nowIso,
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to save session locally:", e);
+    }
+
+    try {
       const { error } = await supabase
         .from("interview_sessions")
         .upsert(
@@ -53,7 +68,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
             user_id: user.id,
             messages: payload,
             is_completed: completed,
-            updated_at: new Date().toISOString(),
+            updated_at: nowIso,
           },
           { onConflict: "user_id" },
         );
@@ -64,7 +79,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     } catch (e) {
       console.error("Failed to persist session:", e);
     }
-  }, [user]);
+  }, [user, localSessionKey]);
 
   // Save session continuously while interview is in progress
   useEffect(() => {
@@ -103,30 +118,69 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     };
   }, [messages, started, user, autoSaved, persistSession]);
 
-  // ── Restore session on mount ──
+  // ── Restore session on mount (local backup first, DB second) ──
   useEffect(() => {
     if (!user || restoredSession) return;
-    const restore = async () => {
-      const { data } = await supabase
-        .from("interview_sessions")
-        .select("messages, is_completed")
-        .eq("user_id", user.id)
-        .maybeSingle();
 
-      if (data && !data.is_completed && Array.isArray(data.messages) && (data.messages as any[]).length > 0) {
-        setMessages(data.messages as Message[]);
-        setStarted(true);
+    const restore = async () => {
+      let localCount = 0;
+
+      try {
+        if (localSessionKey) {
+          const localRaw = localStorage.getItem(localSessionKey);
+          if (localRaw) {
+            const localData = JSON.parse(localRaw);
+            if (!localData?.is_completed && Array.isArray(localData?.messages) && localData.messages.length > 0) {
+              localCount = localData.messages.length;
+              setMessages(localData.messages as Message[]);
+              setStarted(true);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to restore local session:", e);
       }
-      setRestoredSession(true);
+
+      try {
+        const { data, error } = await supabase
+          .from("interview_sessions")
+          .select("messages, is_completed")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Failed to restore session from DB:", error.message);
+        }
+
+        if (data?.is_completed) {
+          if (localSessionKey) localStorage.removeItem(localSessionKey);
+        } else if (data && Array.isArray(data.messages) && (data.messages as any[]).length > 0) {
+          const dbMessages = data.messages as Message[];
+          if (dbMessages.length >= localCount) {
+            setMessages(dbMessages);
+            setStarted(true);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to restore session from DB:", e);
+      } finally {
+        setRestoredSession(true);
+      }
     };
-    restore();
-  }, [user, restoredSession]);
+
+    void restore();
+  }, [user, restoredSession, localSessionKey]);
 
   // ── Clear session after result saved ──
   const clearSession = useCallback(async () => {
     if (!user) return;
+
+    if (localSessionKey) {
+      localStorage.removeItem(localSessionKey);
+    }
+
     await supabase.from("interview_sessions").delete().eq("user_id", user.id);
-  }, [user]);
+  }, [user, localSessionKey]);
 
   const startInterview = async () => {
     setStarted(true);
