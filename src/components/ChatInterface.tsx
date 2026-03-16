@@ -752,6 +752,25 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
                   Seu navegador não suporta reconhecimento de voz. Use <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong>.
                 </p>
               </div>
+            ) : micError === "iframe-blocked" ? (
+              <div className="pr-6">
+                <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mb-2">
+                  <MicOff className="w-4 h-4" /> Microfone indisponível neste site
+                </p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  O microfone não pode ser usado quando o app está embutido em outro site. Para usar o recurso de voz:
+                </p>
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  <p className="flex items-start gap-1.5">
+                    <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                    <span>Abra o teste diretamente em uma nova aba: <a href={window.location.href} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 font-medium">Abrir em nova aba ↗</a></span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                    <span>Ou continue digitando suas respostas normalmente — o microfone é opcional!</span>
+                  </p>
+                </div>
+              </div>
             ) : (
               <div className="pr-6">
                 <p className="text-sm font-semibold text-destructive flex items-center gap-1.5 mb-2">
