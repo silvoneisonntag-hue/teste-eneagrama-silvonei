@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import type { Json } from "@/integrations/supabase/types";
-import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff, X, Settings } from "lucide-react";
+import { Send, RotateCcw, ArrowLeft, Info, Mic, MicOff, X, Settings, Save } from "lucide-react";
 import InterviewProgress from "@/components/InterviewProgress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,11 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
   const [micError, setMicError] = useState<"not-supported" | "not-allowed" | null>(null);
+  const [restoredSession, setRestoredSession] = useState(false);
+  const [manualSaving, setManualSaving] = useState(false);
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,6 +39,65 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  // ── Persist conversation to DB periodically ──
+  const persistSession = useCallback(async (msgs: Message[], completed = false) => {
+    if (!user || msgs.length < 2) return;
+    try {
+      const { data: existing } = await supabase
+        .from("interview_sessions")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from("interview_sessions")
+          .update({ messages: JSON.parse(JSON.stringify(msgs)) as Json, is_completed: completed, updated_at: new Date().toISOString() })
+          .eq("user_id", user.id);
+      } else {
+        await supabase.from("interview_sessions")
+          .insert({ user_id: user.id, messages: JSON.parse(JSON.stringify(msgs)) as Json, is_completed: completed });
+      }
+    } catch (e) {
+      console.error("Failed to persist session:", e);
+    }
+  }, [user]);
+
+  // Save session after each assistant response
+  useEffect(() => {
+    if (!started || messages.length < 2) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "assistant" && !isLoading) {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => persistSession(messages), 2000);
+    }
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [messages, isLoading, started, persistSession]);
+
+  // ── Restore session on mount ──
+  useEffect(() => {
+    if (!user || restoredSession) return;
+    const restore = async () => {
+      const { data } = await supabase
+        .from("interview_sessions")
+        .select("messages, is_completed")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (data && !data.is_completed && Array.isArray(data.messages) && (data.messages as any[]).length >= 2) {
+        setMessages(data.messages as Message[]);
+        setStarted(true);
+      }
+      setRestoredSession(true);
+    };
+    restore();
+  }, [user, restoredSession]);
+
+  // ── Clear session after result saved ──
+  const clearSession = useCallback(async () => {
+    if (!user) return;
+    await supabase.from("interview_sessions").delete().eq("user_id", user.id);
+  }, [user]);
 
   const startInterview = async () => {
     setStarted(true);
@@ -125,23 +187,18 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       .join("\n");
 
     // Parse the structured "Resumo executivo" section from the final report
-    // Priority: parse from last assistant message first (the final report)
     const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
     const reportText = lastAssistant?.content || fullText;
 
     // Structured format patterns (from Resumo executivo)
     const structuredPatterns = [
-      // "Tipo mais provável: Tipo 9 — O Pacificador (com forte traço de ação) (85%)"
       /Tipo\s+mais\s+prov[áa]vel[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*(.+?)\s*\((\d+)%\)/i,
-      // "Segundo tipo possível: Tipo 6 — O Questionador (10%)"
       /Segundo\s+tipo\s+poss[íi]vel[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*(.+?)\s*\((\d+)%\)/i,
-      // "Terceira possibilidade: Tipo 1 — O Reformador (5%)"
       /Terceira\s+possibilidade[:\s]*Tipo\s+(\d+)\s*[—–\-]\s*(.+?)\s*\((\d+)%\)/i,
     ];
 
     let allMatches: { num: string; name: string; pct: number }[] = [];
 
-    // Try structured patterns first (most reliable)
     for (const sp of structuredPatterns) {
       const m = reportText.match(sp);
       if (m) {
@@ -149,17 +206,12 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    // Fallback: generic patterns if structured didn't find enough
     if (allMatches.length < 2) {
-      allMatches = []; // Reset to avoid mixing
+      allMatches = [];
       const genericPatterns = [
-        // "Tipo 4 — O Individualista (65%)" — allows parens in name via .+?
         /Tipo\s+(\d+)\s*[—–\-:]\s*(.+?)\s*\((\d+)%\)/gi,
-        // "**Tipo 4 — O Individualista** (65%)"
         /\*{0,2}Tipo\s+(\d+)\s*[—–\-:]\s*(.+?)\*{0,2}\s*\((\d+)%\)/gi,
-        // "Tipo 4 (O Individualista) — 65%"
         /Tipo\s+(\d+)\s*\(([^)]+)\)\s*[—–\-:]\s*(\d+)%/gi,
-        // "Tipo 4: 65%" simple format
         /Tipo\s+(\d+)\s*:\s*(\d+)%/gi,
       ];
 
@@ -168,7 +220,6 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
         if (matches.length > 0) {
           for (const m of matches) {
             if (pattern === genericPatterns[3]) {
-              // "Tipo N: pct%" — only 2 capture groups
               allMatches.push({ num: m[1], name: `Tipo ${m[1]}`, pct: parseInt(m[2]) });
             } else {
               allMatches.push({ num: m[1], name: m[2].trim().replace(/\*+/g, ""), pct: parseInt(m[3]) });
@@ -179,7 +230,6 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    // Fallback: look for any "X%" near "Tipo N" mentions
     if (allMatches.length === 0) {
       const loosePct = /Tipo\s+(\d+)[^%\n]{0,80}?(\d{1,3})%/gi;
       const looseMatches = [...reportText.matchAll(loosePct)];
@@ -191,7 +241,6 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    // Last resort: look for "Tipo N" mentions and estimate percentages
     if (allMatches.length === 0 && lastAssistant) {
       const tipoNumPattern = /Tipo\s+(\d+)/gi;
       const tipoNums = [...lastAssistant.content.matchAll(tipoNumPattern)];
@@ -204,7 +253,6 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    // Deduplicate by type number, keep highest pct
     const seen = new Map<string, { num: string; name: string; pct: number }>();
     for (const m of allMatches) {
       const existing = seen.get(m.num);
@@ -232,7 +280,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       type3Pct = uniqueMatches[2].pct;
     }
 
-    // Extract subtypes with broader patterns
+    // Extract subtypes
     const subtypePatterns = [
       /subtipo\s+(?:predominante|dominante)[:\s]*(\w+)/i,
       /subtipo[:\s]*(\w+)/i,
@@ -263,7 +311,26 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       }
     }
 
-    // lastAssistant already defined above
+    // Extract additional fields
+    const healthMatch = fullText.match(/n[íi]vel\s+(?:de\s+)?sa[úu]de[:\s]*(\d+)/i);
+    const healthLevel = healthMatch ? parseInt(healthMatch[1]) : null;
+
+    const integrationMatch = fullText.match(/integra[çc][ãa]o[^.]*?Tipo\s+(\d+)/i);
+    const integrationDirection = integrationMatch ? `Tipo ${integrationMatch[1]}` : null;
+
+    const disintegrationMatch = fullText.match(/(?:desintegra[çc][ãa]o|estresse)[^.]*?Tipo\s+(\d+)/i);
+    const disintegrationDirection = disintegrationMatch ? `Tipo ${disintegrationMatch[1]}` : null;
+
+    const tritypeMatch = fullText.match(/tritipo[:\s]*(\d[\s\-—–,]+\d[\s\-—–,]+\d)/i);
+    const tritype = tritypeMatch ? tritypeMatch[1].replace(/[\s—–]+/g, "-") : null;
+
+    const centerMatch = fullText.match(/centro\s+(?:dominante|principal)[:\s]*([\w\s]+?)(?:\.|,|\n)/i);
+    const dominantCenter = centerMatch ? centerMatch[1].trim() : null;
+
+    // Subtype percentages
+    const preservMatch = fullText.match(/(?:preserva[çc][ãa]o|autopreserva[çc][ãa]o)[:\s]*(\d+)%/i);
+    const socialMatch = fullText.match(/social[:\s]*(\d+)%/i);
+    const sexualMatch = fullText.match(/sexual[:\s]*(\d+)%/i);
 
     const { data, error } = await supabase.from("enneagram_results").insert([{
       user_id: user.id,
@@ -275,21 +342,47 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       type_3_pct: type3Pct,
       dominant_subtype: dominantSubtype,
       wing,
+      health_level: healthLevel,
+      integration_direction: integrationDirection,
+      disintegration_direction: disintegrationDirection,
+      tritype,
+      dominant_center: dominantCenter,
+      subtype_preservation: preservMatch ? parseInt(preservMatch[1]) : null,
+      subtype_social: socialMatch ? parseInt(socialMatch[1]) : null,
+      subtype_sexual: sexualMatch ? parseInt(sexualMatch[1]) : null,
       conversation: JSON.parse(JSON.stringify(messages)) as Json,
       summary: lastAssistant?.content || null,
     }]).select("id").single();
 
     setAutoSaved(true);
+    // Mark session as completed and clean up
+    await persistSession(messages, true);
+    await clearSession();
+    
     if (!error && data?.id && onResultSaved) {
       onResultSaved(data.id);
     }
   };
 
-  const resetInterview = () => {
+  // Manual save button handler
+  const handleManualSave = async () => {
+    if (autoSaved || manualSaving) return;
+    setManualSaving(true);
+    try {
+      await autoSaveResults();
+      toast.success("Resultado salvo com sucesso!");
+    } catch (e) {
+      toast.error("Erro ao salvar resultado");
+    }
+    setManualSaving(false);
+  };
+
+  const resetInterview = async () => {
     setMessages([]);
     setStarted(false);
     setInput("");
     setAutoSaved(false);
+    await clearSession();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -315,7 +408,6 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       setIsProcessingAudio(true);
       recognitionRef.current.stop();
       setIsRecording(false);
-      // Brief processing indicator then clear
       setTimeout(() => setIsProcessingAudio(false), 800);
       return;
     }
@@ -351,7 +443,6 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     recognition.onend = () => {
       setIsRecording(false);
-      // If still processing, clear after a moment
       setTimeout(() => setIsProcessingAudio(false), 600);
     };
 
@@ -367,15 +458,29 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
   const lastMsg = messages[messages.length - 1];
   const hasEnoughMessages = userMsgCount >= 10;
+  
+  // Improved interview done detection - much more flexible
   const interviewDone =
     !isLoading &&
     hasEnoughMessages &&
     lastMsg?.role === "assistant" &&
     (
+      // Original patterns
       (/Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.toLowerCase().includes("tipo mais provável")) ||
       (lastMsg.content.toLowerCase().includes("análise final") && /\d+%/.test(lastMsg.content)) ||
-      (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content))
+      (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content)) ||
+      // New broader patterns
+      (/relat[óo]rio\s+de\s+perfil/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
+      (/resumo\s+executivo/i.test(lastMsg.content) && /Tipo\s+\d+/i.test(lastMsg.content)) ||
+      (/perfil\s+eneagram[áa]tico/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
+      (/diagnóstico|diagn[óo]stico/i.test(lastMsg.content) && /Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.length > 1500) ||
+      // Long final message with type + percentage (likely a report)
+      (lastMsg.content.length > 2000 && /Tipo\s+\d+/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content) && /(motiva[çc][ãa]o|medo|asa|subtipo|integra[çc][ãa]o)/i.test(lastMsg.content))
     );
+
+  // Show manual save button when interview seems advanced but not auto-detected as done
+  const showManualSave = !autoSaved && !interviewDone && hasEnoughMessages && !isLoading && lastMsg?.role === "assistant" && 
+    (/Tipo\s+\d+/i.test(lastMsg.content) && lastMsg.content.length > 800);
 
   const currentPhase = interviewDone
     ? 4
@@ -432,6 +537,18 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
           <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
         </div>
         <div className="flex items-center gap-2">
+          {showManualSave && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleManualSave}
+              disabled={manualSaving}
+              className="gap-2 text-primary border-primary/30 hover:bg-primary/10"
+            >
+              <Save className="w-4 h-4" />
+              {manualSaving ? "Salvando..." : "Salvar Resultado"}
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={resetInterview} className="gap-2 text-muted-foreground">
             <RotateCcw className="w-4 h-4" />
             Recomeçar
@@ -494,6 +611,15 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Auto-saved notification */}
+        {autoSaved && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center">
+            <div className="bg-primary/10 border border-primary/30 rounded-xl px-4 py-2">
+              <p className="text-xs font-body text-primary font-semibold">✓ Resultado salvo automaticamente</p>
             </div>
           </motion.div>
         )}
