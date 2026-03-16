@@ -144,15 +144,17 @@ const Index = () => {
                   </p>
                 </AlertDescription>
               </Alert>
-              <Button
-                variant="hero"
-                size="lg"
-                onClick={handleStartInterview}
-                className="px-8 py-6 text-base rounded-xl gap-3 glow-gold"
-              >
-                Começar Entrevista
-                <ArrowRight className="w-5 h-5" />
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="hero"
+                  size="lg"
+                  onClick={handleStartInterview}
+                  className="px-8 py-6 text-base rounded-xl gap-3 glow-gold"
+                >
+                  {hasPendingSession ? "Continuar Entrevista" : "Começar Entrevista"}
+                  {hasPendingSession ? <Play className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                </Button>
+              </div>
             </motion.div>
 
             <motion.div
