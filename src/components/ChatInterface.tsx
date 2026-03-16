@@ -113,7 +113,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (data && !data.is_completed && Array.isArray(data.messages) && (data.messages as any[]).length >= 2) {
+      if (data && !data.is_completed && Array.isArray(data.messages) && (data.messages as any[]).length > 0) {
         setMessages(data.messages as Message[]);
         setStarted(true);
       }
