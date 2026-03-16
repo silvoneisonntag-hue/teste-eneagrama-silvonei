@@ -423,7 +423,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
   };
 
-  const toggleRecording = () => {
+  const toggleRecording = async () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setMicError("not-supported");
@@ -439,8 +439,23 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       return;
     }
 
-    // Clear any previous error and try again
+    // Clear any previous error
     setMicError(null);
+
+    // Pre-check microphone permission via getUserMedia before starting SpeechRecognition
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Permission granted — release the stream immediately
+      stream.getTracks().forEach(track => track.stop());
+    } catch (err: any) {
+      console.error("Microphone permission error:", err);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setMicError("not-allowed");
+      } else {
+        setMicError("not-supported");
+      }
+      return;
+    }
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
@@ -465,6 +480,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
+      // Only show banner for permission errors, not transient ones like "network" or "aborted"
       if (event.error === "not-allowed") {
         setMicError("not-allowed");
       }
@@ -476,8 +492,13 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       setTimeout(() => setIsProcessingAudio(false), 600);
     };
 
-    recognition.start();
-    setIsRecording(true);
+    try {
+      recognition.start();
+      setIsRecording(true);
+    } catch (e) {
+      console.error("Failed to start recognition:", e);
+      setIsRecording(false);
+    }
   };
 
   // Detect current interview phase based on messages
