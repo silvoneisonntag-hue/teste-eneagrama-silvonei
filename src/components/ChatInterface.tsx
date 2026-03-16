@@ -477,7 +477,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     }
   };
 
-  const toggleRecording = async () => {
+  const toggleRecording = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setMicError("not-supported");
@@ -493,23 +493,8 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       return;
     }
 
-    // Clear any previous error
+    // Clear any previous error and try again immediately
     setMicError(null);
-
-    // Pre-check microphone permission via getUserMedia before starting SpeechRecognition
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Permission granted — release the stream immediately
-      stream.getTracks().forEach(track => track.stop());
-    } catch (err: any) {
-      console.error("Microphone permission error:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setMicError("not-allowed");
-      } else {
-        setMicError("not-supported");
-      }
-      return;
-    }
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
@@ -533,12 +518,17 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     };
 
     recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
-      // Only show banner for permission errors, not transient ones like "network" or "aborted"
-      if (event.error === "not-allowed") {
+      const errorCode = String(event.error || "unknown");
+      console.error("Speech recognition error:", errorCode);
+
+      if (["not-allowed", "service-not-allowed", "audio-capture"].includes(errorCode)) {
         setMicError("not-allowed");
+      } else if (["language-not-supported", "bad-grammar"].includes(errorCode)) {
+        setMicError("not-supported");
       }
+
       setIsRecording(false);
+      setIsProcessingAudio(false);
     };
 
     recognition.onend = () => {
@@ -552,6 +542,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     } catch (e) {
       console.error("Failed to start recognition:", e);
       setIsRecording(false);
+      setMicError("not-supported");
     }
   };
 
