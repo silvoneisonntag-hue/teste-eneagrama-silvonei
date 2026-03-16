@@ -40,39 +40,68 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // ── Persist conversation to DB periodically ──
+  // ── Persist conversation to DB ──
   const persistSession = useCallback(async (msgs: Message[], completed = false) => {
-    if (!user || msgs.length < 2) return;
-    try {
-      const { data: existing } = await supabase
-        .from("interview_sessions")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+    if (!user || msgs.length === 0) return;
 
-      if (existing) {
-        await supabase.from("interview_sessions")
-          .update({ messages: JSON.parse(JSON.stringify(msgs)) as Json, is_completed: completed, updated_at: new Date().toISOString() })
-          .eq("user_id", user.id);
-      } else {
-        await supabase.from("interview_sessions")
-          .insert({ user_id: user.id, messages: JSON.parse(JSON.stringify(msgs)) as Json, is_completed: completed });
+    try {
+      const payload = JSON.parse(JSON.stringify(msgs)) as Json;
+      const { error } = await supabase
+        .from("interview_sessions")
+        .upsert(
+          {
+            user_id: user.id,
+            messages: payload,
+            is_completed: completed,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
+
+      if (error) {
+        console.error("Failed to persist session:", error.message);
       }
     } catch (e) {
       console.error("Failed to persist session:", e);
     }
   }, [user]);
 
-  // Save session after each assistant response
+  // Save session continuously while interview is in progress
   useEffect(() => {
-    if (!started || messages.length < 2) return;
-    const lastMsg = messages[messages.length - 1];
-    if (lastMsg?.role === "assistant" && !isLoading) {
+    if (!started || !user || autoSaved || messages.length === 0) return;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      void persistSession(messages);
+    }, 800);
+
+    return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = setTimeout(() => persistSession(messages), 2000);
-    }
-    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [messages, isLoading, started, persistSession]);
+    };
+  }, [messages, started, user, autoSaved, persistSession]);
+
+  // Flush latest state when tab/app is hidden or closed
+  useEffect(() => {
+    if (!started || !user || autoSaved) return;
+
+    const flushSession = () => {
+      if (messages.length > 0) {
+        void persistSession(messages);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushSession();
+    };
+
+    window.addEventListener("pagehide", flushSession);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pagehide", flushSession);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [messages, started, user, autoSaved, persistSession]);
 
   // ── Restore session on mount ──
   useEffect(() => {
