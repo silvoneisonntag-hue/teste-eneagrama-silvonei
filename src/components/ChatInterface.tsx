@@ -25,7 +25,8 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   const [autoSaved, setAutoSaved] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
-  const [micError, setMicError] = useState<"not-supported" | "not-allowed" | null>(null);
+  const [micError, setMicError] = useState<"not-supported" | "not-allowed" | "iframe-blocked" | null>(null);
+  const isInIframe = useRef(window !== window.top);
   const [restoredSession, setRestoredSession] = useState(false);
   const [manualSaving, setManualSaving] = useState(false);
   const recognitionRef = useRef<any>(null);
