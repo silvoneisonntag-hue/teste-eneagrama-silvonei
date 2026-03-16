@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield, Info } from "lucide-react";
+import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield, Info, Play } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
@@ -26,11 +26,12 @@ const enneagramTypes = [
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasPendingSession, setHasPendingSession] = useState(false);
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) { setIsAdmin(false); return; }
+    if (!user) { setIsAdmin(false); setHasPendingSession(false); return; }
     supabase
       .from("user_roles")
       .select("role")
@@ -38,6 +39,14 @@ const Index = () => {
       .eq("role", "admin")
       .maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
+
+    supabase
+      .from("interview_sessions")
+      .select("id, is_completed")
+      .eq("user_id", user.id)
+      .eq("is_completed", false)
+      .maybeSingle()
+      .then(({ data }) => setHasPendingSession(!!data));
   }, [user]);
 
   const handleStartInterview = () => {
@@ -135,15 +144,17 @@ const Index = () => {
                   </p>
                 </AlertDescription>
               </Alert>
-              <Button
-                variant="hero"
-                size="lg"
-                onClick={handleStartInterview}
-                className="px-8 py-6 text-base rounded-xl gap-3 glow-gold"
-              >
-                Começar Entrevista
-                <ArrowRight className="w-5 h-5" />
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="hero"
+                  size="lg"
+                  onClick={handleStartInterview}
+                  className="px-8 py-6 text-base rounded-xl gap-3 glow-gold"
+                >
+                  {hasPendingSession ? "Continuar Entrevista" : "Começar Entrevista"}
+                  {hasPendingSession ? <Play className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+                </Button>
+              </div>
             </motion.div>
 
             <motion.div
