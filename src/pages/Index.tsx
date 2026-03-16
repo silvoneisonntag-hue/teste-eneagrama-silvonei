@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield, Info } from "lucide-react";
+import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield, Info, Play } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
