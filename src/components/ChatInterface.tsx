@@ -523,7 +523,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       console.error("Speech recognition error:", errorCode);
 
       if (["not-allowed", "service-not-allowed", "audio-capture"].includes(errorCode)) {
-        setMicError("not-allowed");
+        setMicError(isInIframe.current ? "iframe-blocked" : "not-allowed");
       } else if (["language-not-supported", "bad-grammar"].includes(errorCode)) {
         setMicError("not-supported");
       }
