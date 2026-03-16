@@ -136,6 +136,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
       { role: "user", content: "Olá, gostaria de fazer o teste de Eneagrama." },
     ];
     setMessages(initialMessages);
+    void persistSession(initialMessages);
 
     let assistantSoFar = "";
     const upsertAssistant = (chunk: string) => {
