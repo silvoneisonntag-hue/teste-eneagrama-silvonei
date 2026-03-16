@@ -31,7 +31,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) { setIsAdmin(false); return; }
+    if (!user) { setIsAdmin(false); setHasPendingSession(false); return; }
     supabase
       .from("user_roles")
       .select("role")
@@ -39,6 +39,14 @@ const Index = () => {
       .eq("role", "admin")
       .maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
+
+    supabase
+      .from("interview_sessions")
+      .select("id, is_completed")
+      .eq("user_id", user.id)
+      .eq("is_completed", false)
+      .maybeSingle()
+      .then(({ data }) => setHasPendingSession(!!data));
   }, [user]);
 
   const handleStartInterview = () => {
