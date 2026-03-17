@@ -326,6 +326,51 @@ const ClientesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Notify one-by-one dialog */}
+      <Dialog open={notifyDialogOpen} onOpenChange={setNotifyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">
+              Notificar Pendentes ({notifyIndex + 1} de {notifyQueue.length})
+            </DialogTitle>
+          </DialogHeader>
+          {currentNotifyClient && (
+            <div className="space-y-4 pt-2">
+              <div className="bg-secondary/50 rounded-xl p-4 space-y-1">
+                <p className="font-body font-medium text-foreground">
+                  {currentNotifyClient.display_name || "Sem nome"}
+                </p>
+                <p className="font-body text-sm text-muted-foreground">
+                  📱 {currentNotifyClient.phone}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 gap-2 rounded-xl font-body"
+                  onClick={handleSendAndNext}
+                >
+                  <Send className="w-4 h-4" />
+                  {notifyIndex + 1 < notifyQueue.length ? "Enviar e Próximo" : "Enviar e Finalizar"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl font-body"
+                  onClick={handleSkipClient}
+                >
+                  Pular
+                </Button>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-1.5">
+                <div
+                  className="bg-primary h-1.5 rounded-full transition-all"
+                  style={{ width: `${((notifyIndex + 1) / notifyQueue.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
