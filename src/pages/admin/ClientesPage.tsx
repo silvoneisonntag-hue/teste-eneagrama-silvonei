@@ -134,24 +134,43 @@ const ClientesPage = () => {
       toast.error("Nenhum cliente pendente com telefone cadastrado.");
       return;
     }
+    setNotifyQueue(pendingWithPhone);
+    setNotifyIndex(0);
+    setNotifyDialogOpen(true);
+  };
 
+  const currentNotifyClient = notifyQueue[notifyIndex] || null;
+
+  const openWhatsAppForClient = (client: Client) => {
     const appUrl = "https://teste-eneagrama-silvonei.lovable.app";
+    let phone = (client.phone || "").replace(/\D/g, "");
+    if (phone.startsWith("0")) phone = "55" + phone.slice(1);
+    if (!phone.startsWith("55")) phone = "55" + phone;
+    const message = encodeURIComponent(
+      `Olá ${client.display_name || ""}! 🌟\n\nVocê ainda não completou seu Teste de Eneagrama. É rápido e vai te ajudar a se conhecer melhor!\n\n🔗 Acesse aqui: ${appUrl}\n\nQualquer dúvida, estou à disposição! 😊`
+    );
+    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+  };
 
-    pendingWithPhone.forEach((client, index) => {
-      let phone = (client.phone || "").replace(/\D/g, "");
-      if (phone.startsWith("0")) phone = "55" + phone.slice(1);
-      if (!phone.startsWith("55")) phone = "55" + phone;
+  const handleSendAndNext = () => {
+    if (currentNotifyClient) {
+      openWhatsAppForClient(currentNotifyClient);
+    }
+    if (notifyIndex + 1 < notifyQueue.length) {
+      setNotifyIndex((i) => i + 1);
+    } else {
+      setNotifyDialogOpen(false);
+      toast.success("Todos os clientes pendentes foram notificados!");
+    }
+  };
 
-      const message = encodeURIComponent(
-        `Olá ${client.display_name || ""}! 🌟\n\nVocê ainda não completou seu Teste de Eneagrama. É rápido e vai te ajudar a se conhecer melhor!\n\n🔗 Acesse aqui: ${appUrl}\n\nQualquer dúvida, estou à disposição! 😊`
-      );
-
-      setTimeout(() => {
-        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-      }, index * 1500);
-    });
-
-    toast.success(`Abrindo WhatsApp para ${pendingWithPhone.length} cliente(s) pendente(s)...`);
+  const handleSkipClient = () => {
+    if (notifyIndex + 1 < notifyQueue.length) {
+      setNotifyIndex((i) => i + 1);
+    } else {
+      setNotifyDialogOpen(false);
+      toast.info("Finalizado.");
+    }
   };
 
   return (
