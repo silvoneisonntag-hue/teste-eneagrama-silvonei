@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Search, Eye, Trash2, FileText, Copy } from "lucide-react";
+import { UserPlus, Search, Eye, Trash2, FileText, Copy, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -124,6 +124,33 @@ const ClientesPage = () => {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
+  const pendingWithPhone = clients.filter((c) => !c.hasResult && c.phone);
+
+  const handleNotifyPending = () => {
+    if (pendingWithPhone.length === 0) {
+      toast.error("Nenhum cliente pendente com telefone cadastrado.");
+      return;
+    }
+
+    const appUrl = "https://teste-eneagrama-silvonei.lovable.app";
+
+    pendingWithPhone.forEach((client, index) => {
+      let phone = (client.phone || "").replace(/\D/g, "");
+      if (phone.startsWith("0")) phone = "55" + phone.slice(1);
+      if (!phone.startsWith("55")) phone = "55" + phone;
+
+      const message = encodeURIComponent(
+        `Olá ${client.display_name || ""}! 🌟\n\nVocê ainda não completou seu Teste de Eneagrama. É rápido e vai te ajudar a se conhecer melhor!\n\n🔗 Acesse aqui: ${appUrl}\n\nQualquer dúvida, estou à disposição! 😊`
+      );
+
+      setTimeout(() => {
+        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+      }, index * 1500);
+    });
+
+    toast.success(`Abrindo WhatsApp para ${pendingWithPhone.length} cliente(s) pendente(s)...`);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -133,59 +160,70 @@ const ClientesPage = () => {
             Gerencie seus clientes e envie questionários
           </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl font-body">
-              <UserPlus className="w-4 h-4" />
-              Novo Cliente
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-heading">Cadastrar Novo Cliente</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="font-body">Nome *</Label>
-                <Input
-                  id="name"
-                  placeholder="Nome completo"
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  className="rounded-xl font-body"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="font-body">E-mail *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="email@exemplo.com"
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  className="rounded-xl font-body"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="font-body">WhatsApp</Label>
-                <Input
-                  id="phone"
-                  placeholder="(11) 99999-9999"
-                  value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                  className="rounded-xl font-body"
-                />
-              </div>
-              <Button
-                onClick={handleCreate}
-                disabled={submitting}
-                className="w-full rounded-xl font-body"
-              >
-                {submitting ? "Cadastrando..." : "Cadastrar Cliente"}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2 rounded-xl font-body border-green-600/30 text-green-400 hover:bg-green-600/10 hover:text-green-300"
+            onClick={handleNotifyPending}
+            disabled={pendingWithPhone.length === 0}
+          >
+            <Send className="w-4 h-4" />
+            Notificar Pendentes ({pendingWithPhone.length})
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 rounded-xl font-body">
+                <UserPlus className="w-4 h-4" />
+                Novo Cliente
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="font-heading">Cadastrar Novo Cliente</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="font-body">Nome *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Nome completo"
+                    value={form.name}
+                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                    className="rounded-xl font-body"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="font-body">E-mail *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    value={form.email}
+                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                    className="rounded-xl font-body"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="font-body">WhatsApp</Label>
+                  <Input
+                    id="phone"
+                    placeholder="(11) 99999-9999"
+                    value={form.phone}
+                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                    className="rounded-xl font-body"
+                  />
+                </div>
+                <Button
+                  onClick={handleCreate}
+                  disabled={submitting}
+                  className="w-full rounded-xl font-body"
+                >
+                  {submitting ? "Cadastrando..." : "Cadastrar Cliente"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="bg-card/80 rounded-2xl border border-border/50 p-6">
