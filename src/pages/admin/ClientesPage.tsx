@@ -18,6 +18,9 @@ interface Client {
 }
 
 const ClientesPage = () => {
+  const [notifyQueue, setNotifyQueue] = useState<Client[]>([]);
+  const [notifyIndex, setNotifyIndex] = useState(0);
+  const [notifyDialogOpen, setNotifyDialogOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -131,24 +134,43 @@ const ClientesPage = () => {
       toast.error("Nenhum cliente pendente com telefone cadastrado.");
       return;
     }
+    setNotifyQueue(pendingWithPhone);
+    setNotifyIndex(0);
+    setNotifyDialogOpen(true);
+  };
 
+  const currentNotifyClient = notifyQueue[notifyIndex] || null;
+
+  const openWhatsAppForClient = (client: Client) => {
     const appUrl = "https://teste-eneagrama-silvonei.lovable.app";
+    let phone = (client.phone || "").replace(/\D/g, "");
+    if (phone.startsWith("0")) phone = "55" + phone.slice(1);
+    if (!phone.startsWith("55")) phone = "55" + phone;
+    const message = encodeURIComponent(
+      `Olá ${client.display_name || ""}! 🌟\n\nVocê ainda não completou seu Teste de Eneagrama. É rápido e vai te ajudar a se conhecer melhor!\n\n🔗 Acesse aqui: ${appUrl}\n\nQualquer dúvida, estou à disposição! 😊`
+    );
+    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+  };
 
-    pendingWithPhone.forEach((client, index) => {
-      let phone = (client.phone || "").replace(/\D/g, "");
-      if (phone.startsWith("0")) phone = "55" + phone.slice(1);
-      if (!phone.startsWith("55")) phone = "55" + phone;
+  const handleSendAndNext = () => {
+    if (currentNotifyClient) {
+      openWhatsAppForClient(currentNotifyClient);
+    }
+    if (notifyIndex + 1 < notifyQueue.length) {
+      setNotifyIndex((i) => i + 1);
+    } else {
+      setNotifyDialogOpen(false);
+      toast.success("Todos os clientes pendentes foram notificados!");
+    }
+  };
 
-      const message = encodeURIComponent(
-        `Olá ${client.display_name || ""}! 🌟\n\nVocê ainda não completou seu Teste de Eneagrama. É rápido e vai te ajudar a se conhecer melhor!\n\n🔗 Acesse aqui: ${appUrl}\n\nQualquer dúvida, estou à disposição! 😊`
-      );
-
-      setTimeout(() => {
-        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-      }, index * 1500);
-    });
-
-    toast.success(`Abrindo WhatsApp para ${pendingWithPhone.length} cliente(s) pendente(s)...`);
+  const handleSkipClient = () => {
+    if (notifyIndex + 1 < notifyQueue.length) {
+      setNotifyIndex((i) => i + 1);
+    } else {
+      setNotifyDialogOpen(false);
+      toast.info("Finalizado.");
+    }
   };
 
   return (
@@ -304,6 +326,51 @@ const ClientesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Notify one-by-one dialog */}
+      <Dialog open={notifyDialogOpen} onOpenChange={setNotifyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">
+              Notificar Pendentes ({notifyIndex + 1} de {notifyQueue.length})
+            </DialogTitle>
+          </DialogHeader>
+          {currentNotifyClient && (
+            <div className="space-y-4 pt-2">
+              <div className="bg-secondary/50 rounded-xl p-4 space-y-1">
+                <p className="font-body font-medium text-foreground">
+                  {currentNotifyClient.display_name || "Sem nome"}
+                </p>
+                <p className="font-body text-sm text-muted-foreground">
+                  📱 {currentNotifyClient.phone}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 gap-2 rounded-xl font-body"
+                  onClick={handleSendAndNext}
+                >
+                  <Send className="w-4 h-4" />
+                  {notifyIndex + 1 < notifyQueue.length ? "Enviar e Próximo" : "Enviar e Finalizar"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl font-body"
+                  onClick={handleSkipClient}
+                >
+                  Pular
+                </Button>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-1.5">
+                <div
+                  className="bg-primary h-1.5 rounded-full transition-all"
+                  style={{ width: `${((notifyIndex + 1) / notifyQueue.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
