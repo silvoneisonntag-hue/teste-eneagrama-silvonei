@@ -18,6 +18,9 @@ interface Client {
 }
 
 const ClientesPage = () => {
+  const [notifyQueue, setNotifyQueue] = useState<Client[]>([]);
+  const [notifyIndex, setNotifyIndex] = useState(0);
+  const [notifyDialogOpen, setNotifyDialogOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
