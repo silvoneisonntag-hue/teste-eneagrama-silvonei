@@ -305,6 +305,17 @@ const ClientesPage = () => {
                     </td>
                     <td className="py-3 px-2">
                       <div className="flex items-center justify-end gap-1">
+                        {!client.hasResult && client.phone && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-green-400 hover:text-green-300 hover:bg-green-600/10"
+                            title="Enviar lembrete via WhatsApp"
+                            onClick={() => openWhatsAppForClient(client)}
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                           <Eye className="w-4 h-4" />
                         </Button>
