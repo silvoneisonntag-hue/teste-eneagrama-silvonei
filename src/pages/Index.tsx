@@ -2,26 +2,13 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Circle, Sparkles, Brain, LogOut, User, History, Instagram, Youtube, Linkedin, Shield, Info, Play } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowRight, Sparkles, Brain, LogOut, User, Shield, Play, Feather, Eye, Heart } from "lucide-react";
 import enneagramSymbol from "@/assets/enneagram-symbol.png";
 import logo from "@/assets/logo.png";
 import silvoneiPhoto from "@/assets/silvonei.png";
 import ChatInterface from "@/components/ChatInterface";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
-const enneagramTypes = [
-  { num: 1, name: "O Perfeccionista", desc: "Busca a perfeição, é ético e tem forte senso de certo e errado." },
-  { num: 2, name: "O Prestativo", desc: "Generoso e amoroso, busca ser necessário e ajudar os outros." },
-  { num: 3, name: "O Realizador", desc: "Orientado ao sucesso, adaptável e focado em resultados." },
-  { num: 4, name: "O Individualista", desc: "Sensível e introspectivo, busca autenticidade e significado." },
-  { num: 5, name: "O Investigador", desc: "Analítico e reservado, busca conhecimento e compreensão." },
-  { num: 6, name: "O Leal", desc: "Responsável e comprometido, busca segurança e confiança." },
-  { num: 7, name: "O Entusiasta", desc: "Espontâneo e versátil, busca experiências e possibilidades." },
-  { num: 8, name: "O Desafiador", desc: "Assertivo e decidido, busca controle e proteção." },
-  { num: 9, name: "O Pacificador", desc: "Receptivo e tranquilo, busca harmonia e paz interior." },
-];
 
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
@@ -70,10 +57,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Ambient glow effects */}
+      {/* Subtle warm ambient */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/3 blur-[100px]" />
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-accent/5 blur-[150px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/3 blur-[120px]" />
       </div>
 
       {/* Navbar */}
@@ -81,20 +68,20 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <img src={logo} alt="Logo" className="w-9 h-9" />
-            <span className="font-heading text-xl font-semibold text-primary tracking-widest">ENEAGRAMA</span>
+            <span className="font-heading text-xl font-semibold text-foreground tracking-wider">Mapa Interior</span>
           </Link>
           <div className="flex items-center gap-3">
             {loading ? null : user ? (
               <>
                 {isAdmin && (
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-primary">
+                    <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground font-body hover:text-accent">
                       <Shield className="w-4 h-4" />
                       Admin
                     </Button>
                   </Link>
                 )}
-                <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground font-body hover:text-primary">
+                <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground font-body hover:text-accent">
                   <LogOut className="w-4 h-4" />
                   Sair
                 </Button>
@@ -120,38 +107,31 @@ const Index = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <p className="text-primary font-body font-semibold text-sm tracking-[0.3em] uppercase mb-4">
-                ✦ Autoconhecimento profundo
+              <p className="text-accent font-body font-medium text-sm tracking-[0.25em] uppercase mb-4">
+                ✦ Jornada de autoconhecimento
               </p>
-              <h1 className="font-heading text-5xl lg:text-7xl font-bold text-foreground leading-[1.1] mb-6">
-                Descubra seu tipo no{" "}
-                <span className="text-primary text-glow">Eneagrama</span>
+              <h1 className="font-heading text-5xl lg:text-6xl font-bold text-foreground leading-[1.15] mb-6">
+                Descubra os padrões que moldam{" "}
+                <span className="text-accent italic">quem você é</span>
               </h1>
-              <p className="text-muted-foreground font-body text-lg leading-relaxed max-w-md mb-8">
-                Uma entrevista adaptativa e profunda criada para revelar seus padrões de personalidade, motivações e medos mais profundos.
+              <p className="text-muted-foreground font-body text-lg leading-relaxed max-w-lg mb-8">
+                Uma conversa profunda e acolhedora que revela seus padrões de personalidade, motivações e as dinâmicas invisíveis que guiam sua vida.
               </p>
-              <Alert className="mb-6 border-2 border-primary bg-primary/20 max-w-md shadow-[0_0_30px_hsl(43_80%_55%_/_0.25)] rounded-xl">
-                <Info className="w-5 h-5 text-primary !mt-0 flex-shrink-0" />
-                <AlertDescription className="text-foreground font-body text-sm leading-relaxed space-y-3">
-                  <p className="font-bold text-primary">
-                    ⚠ Leia antes de começar
-                  </p>
-                  <p>
-                    Para que o resultado seja mais preciso, é importante realizar a avaliação <strong>com atenção</strong>, em um momento <strong>sem interrupções</strong>, respondendo às perguntas com <strong>honestidade e fidelidade à sua própria experiência</strong> — não apenas ao que você gostaria de ser, mas ao que realmente costuma acontecer na sua vida.
-                  </p>
-                  <p className="font-semibold text-foreground/90">
-                    📌 Considere seus padrões de comportamento <span className="text-primary">desde os 18 anos até o momento atual</span> — tanto em situações <span className="text-primary">pessoais</span> (família, amizades, relacionamentos) quanto <span className="text-primary">profissionais</span> (trabalho, carreira, equipe).
-                  </p>
-                </AlertDescription>
-              </Alert>
+
+              <div className="bg-card/80 border border-border/60 rounded-2xl p-5 mb-8 max-w-lg shadow-[var(--shadow-soft)]">
+                <p className="font-body text-sm text-foreground/80 leading-relaxed">
+                  <span className="text-accent font-semibold">Antes de começar:</span> Reserve um momento tranquilo e sem interrupções. Responda com honestidade, pensando em como você realmente é — não em como gostaria de ser. Considere seus padrões desde os 18 anos, em situações pessoais e profissionais.
+                </p>
+              </div>
+
               <div className="flex flex-wrap gap-3">
                 <Button
                   variant="hero"
                   size="lg"
                   onClick={handleStartInterview}
-                  className="px-8 py-6 text-base rounded-xl gap-3 glow-gold"
+                  className="px-8 py-6 text-base rounded-2xl gap-3 glow-warm"
                 >
-                  {hasPendingSession ? "Continuar Entrevista" : "Começar Entrevista"}
+                  {hasPendingSession ? "Continuar Conversa" : "Iniciar Jornada"}
                   {hasPendingSession ? <Play className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                 </Button>
               </div>
@@ -166,16 +146,16 @@ const Index = () => {
               <motion.img
                 src={enneagramSymbol}
                 alt="Símbolo do Eneagrama com nove pontos interconectados"
-                className="w-[346px] lg:w-96 drop-shadow-[0_0_40px_hsl(43_80%_55%_/_0.3)]"
+                className="w-[300px] lg:w-[360px] opacity-80"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
               />
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* How it works */}
       <section className="py-20 relative z-10">
         <div className="container mx-auto px-6">
           <motion.div
@@ -189,26 +169,26 @@ const Index = () => {
               Como funciona
             </h2>
             <p className="text-muted-foreground font-body max-w-lg mx-auto">
-              Uma experiência personalizada que vai muito além de questionários tradicionais.
+              Uma experiência que vai muito além de questionários tradicionais.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
               {
-                icon: <Brain className="w-6 h-6" />,
-                title: "Entrevista Adaptativa",
-                desc: "A IA adapta cada pergunta com base nas suas respostas anteriores, aprofundando a investigação.",
+                icon: <Heart className="w-6 h-6" />,
+                title: "Conversa Acolhedora",
+                desc: "Uma experiência conversacional profunda, como uma conversa com alguém que realmente te entende.",
               },
               {
-                icon: <Circle className="w-6 h-6" />,
-                title: "25-40 Perguntas",
-                desc: "Uma investigação completa que analisa motivações, medos, padrões de relacionamento e estresse.",
+                icon: <Eye className="w-6 h-6" />,
+                title: "Investigação Profunda",
+                desc: "A cada resposta, a conversa se adapta, revelando padrões emocionais e comportamentais únicos.",
               },
               {
-                icon: <Sparkles className="w-6 h-6" />,
-                title: "Resultado Detalhado",
-                desc: "Receba seu tipo com probabilidades, subtipo instintivo e uma análise psicológica completa.",
+                icon: <Feather className="w-6 h-6" />,
+                title: "Análise Personalizada",
+                desc: "Receba uma leitura detalhada dos seus padrões, forças, desafios e caminhos de crescimento.",
               },
             ].map((item, i) => (
               <motion.div
@@ -217,54 +197,13 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="bg-card/80 backdrop-blur-sm rounded-2xl p-7 border border-border/50 shadow-[var(--shadow-card)] hover:border-primary/30 transition-colors duration-300"
+                className="bg-card/80 rounded-2xl p-7 border border-border/50 shadow-[var(--shadow-card)] hover:border-accent/30 transition-colors duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
                   {item.icon}
                 </div>
                 <h3 className="font-heading text-xl font-semibold text-foreground mb-2">{item.title}</h3>
                 <p className="text-muted-foreground font-body text-sm leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 9 Types */}
-      <section className="py-20 relative z-10">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-14"
-          >
-            <h2 className="font-heading text-3xl lg:text-4xl font-semibold text-foreground mb-3">
-              Os 9 Tipos do Eneagrama
-            </h2>
-            <p className="text-muted-foreground font-body max-w-lg mx-auto">
-              Cada tipo representa um padrão fundamental de motivação, medo e comportamento.
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {enneagramTypes.map((type, i) => (
-              <motion.div
-                key={type.num}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="bg-card/60 backdrop-blur-sm rounded-2xl p-5 border border-border/40 hover:border-primary/30 transition-colors duration-300"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary font-heading font-bold text-sm">
-                    {type.num}
-                  </span>
-                  <h3 className="font-heading text-lg font-semibold text-foreground">{type.name}</h3>
-                </div>
-                <p className="text-muted-foreground font-body text-sm leading-relaxed">{type.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -279,57 +218,25 @@ const Index = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto bg-card/80 backdrop-blur-sm rounded-3xl border border-border/50 p-8 lg:p-10 shadow-[var(--shadow-card)]"
+            className="max-w-3xl mx-auto bg-card/80 rounded-3xl border border-border/50 p-8 lg:p-10 shadow-[var(--shadow-card)]"
           >
             <div className="text-center">
               <img
                 src={silvoneiPhoto}
-                alt="Silvonei Sonntag - Instrutor de Eneagrama"
-                className="w-36 h-36 rounded-full object-cover object-top mx-auto mb-6 border-2 border-primary/30 shadow-lg"
+                alt="Silvonei Sonntag"
+                className="w-36 h-36 rounded-full object-cover object-top mx-auto mb-6 border-2 border-accent/30 shadow-lg"
               />
-              <p className="text-primary font-body font-semibold text-sm tracking-[0.3em] uppercase mb-3">
-                ✦ Sobre o instrutor
+              <p className="text-accent font-body font-medium text-sm tracking-[0.25em] uppercase mb-3">
+                ✦ Sobre o criador
               </p>
               <h2 className="font-heading text-3xl lg:text-4xl font-semibold text-foreground mb-5">
                 Silvonei Sonntag
               </h2>
               <p className="text-muted-foreground font-body text-base leading-relaxed mb-4">
-                Estudioso e instrutor de Eneagrama com anos de experiência em desenvolvimento pessoal e autoconhecimento. 
-                Silvonei utiliza o Eneagrama como ferramenta de transformação, ajudando pessoas a compreenderem seus 
-                padrões de personalidade, motivações profundas e caminhos de crescimento.
+                Estudioso e instrutor com anos de experiência em desenvolvimento humano e autoconhecimento.
+                Sua abordagem combina sabedoria tradicional com metodologias modernas, incluindo esta ferramenta
+                de conversa por inteligência artificial.
               </p>
-              <p className="text-muted-foreground font-body text-base leading-relaxed mb-8">
-                Sua abordagem combina a sabedoria tradicional do Eneagrama com metodologias modernas, 
-                incluindo esta ferramenta de entrevista por inteligência artificial que torna o processo 
-                de tipificação mais acessível, profundo e personalizado.
-              </p>
-
-              <div className="flex items-center justify-center gap-4">
-                <a
-                  href="https://www.instagram.com/silvoneisonntag"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
-                >
-                  <Instagram className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://www.youtube.com/@silvoneisonntag"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
-                >
-                  <Youtube className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/silvoneisonntag/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
-                >
-                  <Linkedin className="w-5 h-5" />
-                </a>
-              </div>
             </div>
           </motion.div>
         </div>
@@ -353,20 +260,20 @@ const Index = () => {
           <div className="space-y-4">
             {[
               {
-                q: "O que é o Eneagrama?",
-                a: "O Eneagrama é um sistema de tipologia de personalidade que descreve 9 tipos fundamentais, cada um com padrões distintos de motivação, medo e comportamento. É usado para autoconhecimento e desenvolvimento pessoal.",
+                q: "O que é essa experiência?",
+                a: "É uma conversa guiada por inteligência artificial que revela seus padrões de personalidade, motivações profundas e dinâmicas comportamentais através de um diálogo adaptativo e acolhedor.",
               },
               {
-                q: "Como funciona a entrevista por IA?",
-                a: "A inteligência artificial conduz uma entrevista adaptativa de 25 a 40 perguntas, analisando suas respostas em tempo real para aprofundar a investigação e identificar seu tipo com mais precisão.",
+                q: "Como funciona a conversa?",
+                a: "A IA conduz uma conversa profunda e personalizada, adaptando cada pergunta com base nas suas respostas. Não é um questionário — é uma experiência conversacional que investiga seus padrões de forma natural.",
               },
               {
                 q: "O resultado é definitivo?",
-                a: "O resultado é indicativo e baseado nas suas respostas durante a entrevista. Para uma tipificação definitiva, recomendamos acompanhamento com um profissional especializado.",
+                a: "O resultado é uma leitura profunda baseada nos padrões que emergiram durante a conversa. Para uma compreensão completa, recomendamos acompanhamento com um profissional especializado.",
               },
               {
-                q: "Posso refazer o teste?",
-                a: "Sim! Você pode fazer quantas entrevistas quiser. Cada resultado é salvo no seu histórico para que você possa comparar.",
+                q: "Posso refazer a conversa?",
+                a: "Sim! Você pode iniciar novas conversas quando quiser. Cada resultado é salvo para que possa revisitar suas descobertas.",
               },
             ].map((item, i) => (
               <motion.div
@@ -389,7 +296,7 @@ const Index = () => {
       <footer className="py-8 border-t border-border/50 relative z-10">
         <div className="container mx-auto px-6 text-center space-y-2">
           <p className="text-muted-foreground font-body text-sm">
-            Este teste é apenas indicativo e não substitui avaliação profissional.
+            Esta experiência é indicativa e não substitui acompanhamento profissional.
           </p>
           <p className="text-muted-foreground/60 font-body text-xs">
             © 2026 Todos os direitos reservados para Silvonei Sonntag Desenvolvimento Humano Ltda
