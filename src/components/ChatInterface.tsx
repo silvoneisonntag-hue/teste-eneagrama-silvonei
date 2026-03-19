@@ -188,7 +188,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     const initialMessages: Message[] = [
-      { role: "user", content: "Olá, gostaria de fazer o teste de Eneagrama." },
+      { role: "user", content: "Olá, gostaria de iniciar minha jornada de autoconhecimento." },
     ];
     setMessages(initialMessages);
     void persistSession(initialMessages);
