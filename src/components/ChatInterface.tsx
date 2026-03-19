@@ -188,7 +188,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     const initialMessages: Message[] = [
-      { role: "user", content: "Olá, gostaria de fazer o teste de Eneagrama." },
+      { role: "user", content: "Olá, gostaria de iniciar minha jornada de autoconhecimento." },
     ];
     setMessages(initialMessages);
     void persistSession(initialMessages);
@@ -550,43 +550,38 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   // Detect current interview phase based on messages
   const userMsgCount = messages.filter(m => m.role === "user").length;
   const allText = messages.map(m => m.content).join("\n");
-  const hasTypeQuestionnaire = /Bloco\s*[12]/i.test(allText) || /A1[:\s]/i.test(allText);
-  const hasInstinctQuestionnaire = /Preservação|instinto/i.test(allText) && /nota de 0 a 10/i.test(allText);
 
   const lastMsg = messages[messages.length - 1];
-  const hasEnoughMessages = userMsgCount >= 10;
+  const hasEnoughMessages = userMsgCount >= 20;
   
-  // Improved interview done detection - much more flexible
+  // Interview done detection — adapted for new conversational format
   const interviewDone =
     !isLoading &&
     hasEnoughMessages &&
     lastMsg?.role === "assistant" &&
     (
-      // Original patterns
       (/Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.toLowerCase().includes("tipo mais provável")) ||
       (lastMsg.content.toLowerCase().includes("análise final") && /\d+%/.test(lastMsg.content)) ||
       (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content)) ||
-      // New broader patterns
+      (/padr[ãa]o\s+psicol[óo]gico\s+central/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
       (/relat[óo]rio\s+de\s+perfil/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
       (/resumo\s+executivo/i.test(lastMsg.content) && /Tipo\s+\d+/i.test(lastMsg.content)) ||
-      (/perfil\s+eneagram[áa]tico/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
-      (/diagnóstico|diagn[óo]stico/i.test(lastMsg.content) && /Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.length > 1500) ||
-      // Long final message with type + percentage (likely a report)
-      (lastMsg.content.length > 2000 && /Tipo\s+\d+/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content) && /(motiva[çc][ãa]o|medo|asa|subtipo|integra[çc][ãa]o)/i.test(lastMsg.content))
+      (lastMsg.content.length > 2000 && /Tipo\s+\d+/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content) && /(motiva[çc][ãa]o|medo|asa|subtipo|integra[çc][ãa]o|padr[ãa]o|crescimento)/i.test(lastMsg.content))
     );
 
   // Show manual save button when interview seems advanced but not auto-detected as done
   const showManualSave = !autoSaved && !interviewDone && hasEnoughMessages && !isLoading && lastMsg?.role === "assistant" && 
     (/Tipo\s+\d+/i.test(lastMsg.content) && lastMsg.content.length > 800);
 
+  // Phase detection based on message count (conversational flow)
   const currentPhase = interviewDone
     ? 4
-    : hasInstinctQuestionnaire
-    ? 2
-    : hasTypeQuestionnaire
-    ? 1
-    : userMsgCount >= 25
+    : userMsgCount >= 50
     ? 3
+    : userMsgCount >= 30
+    ? 2
+    : userMsgCount >= 15
+    ? 1
     : 0;
 
   // Auto-save when interview is done
@@ -615,15 +610,14 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
           className="text-center max-w-lg"
         >
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-4">
-            Pronto para se conhecer melhor?
+            Pronto para olhar para dentro?
           </h2>
           <p className="text-muted-foreground font-body leading-relaxed mb-8">
-            A entrevista será conduzida por uma IA especializada em Eneagrama.
-            Responda com sinceridade — não existem respostas certas ou erradas.
-            A conversa dura entre 25 a 40 perguntas.
+            Uma conversa tranquila e profunda, sem pressa e sem respostas certas.
+            Responda com sinceridade — o mais importante é ser autêntico.
           </p>
-          <Button variant="hero" size="lg" onClick={startInterview} className="px-10 py-6 text-lg rounded-xl">
-            Iniciar Entrevista
+          <Button variant="hero" size="lg" onClick={startInterview} className="px-10 py-6 text-lg rounded-2xl glow-warm">
+            Iniciar Jornada
           </Button>
         </motion.div>
       </div>
@@ -640,7 +634,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           )}
-          <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
+          <h2 className="font-heading text-xl font-semibold text-foreground">Sua Jornada Interior</h2>
         </div>
         <div className="flex items-center gap-2">
           {showManualSave && (
@@ -667,17 +661,13 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-        {/* Fixed disclaimer card */}
-        <div className="rounded-xl border-2 border-primary/60 bg-primary/10 p-4 space-y-2">
-          <p className="font-body text-xs font-bold text-primary flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 flex-shrink-0" />
-            Leia antes de começar
+        {/* Gentle reminder card */}
+        <div className="rounded-2xl border border-accent/30 bg-accent/5 p-4 space-y-2">
+          <p className="font-body text-xs font-medium text-accent flex items-center gap-1.5">
+            🌿 Um lembrete gentil
           </p>
-          <p className="font-body text-xs text-foreground/80 leading-relaxed">
-            Responda com <strong>honestidade e fidelidade à sua experiência real</strong> — não ao que gostaria de ser, mas ao que realmente acontece na sua vida.
-          </p>
-          <p className="font-body text-xs text-foreground/80 leading-relaxed">
-            📌 Considere seus padrões <span className="text-primary font-semibold">desde os 18 anos até hoje</span>, tanto em situações <span className="text-primary font-semibold">pessoais</span> quanto <span className="text-primary font-semibold">profissionais</span>.
+          <p className="font-body text-xs text-foreground/70 leading-relaxed">
+            Responda com honestidade, pensando em como você realmente é — seus padrões desde os 18 anos, em situações pessoais e profissionais. Não existe resposta certa ou errada.
           </p>
         </div>
 

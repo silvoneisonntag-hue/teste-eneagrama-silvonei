@@ -61,7 +61,7 @@ const Auth = () => {
           </h1>
           <p className="text-muted-foreground font-body">
             {isLogin
-              ? "Acesse seus resultados de Eneagrama"
+              ? "Acesse suas descobertas e continue sua jornada"
               : "Crie sua conta para salvar seus resultados"}
           </p>
         </div>
