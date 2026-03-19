@@ -550,43 +550,38 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
   // Detect current interview phase based on messages
   const userMsgCount = messages.filter(m => m.role === "user").length;
   const allText = messages.map(m => m.content).join("\n");
-  const hasTypeQuestionnaire = /Bloco\s*[12]/i.test(allText) || /A1[:\s]/i.test(allText);
-  const hasInstinctQuestionnaire = /Preservação|instinto/i.test(allText) && /nota de 0 a 10/i.test(allText);
 
   const lastMsg = messages[messages.length - 1];
-  const hasEnoughMessages = userMsgCount >= 10;
+  const hasEnoughMessages = userMsgCount >= 20;
   
-  // Improved interview done detection - much more flexible
+  // Interview done detection — adapted for new conversational format
   const interviewDone =
     !isLoading &&
     hasEnoughMessages &&
     lastMsg?.role === "assistant" &&
     (
-      // Original patterns
       (/Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.toLowerCase().includes("tipo mais provável")) ||
       (lastMsg.content.toLowerCase().includes("análise final") && /\d+%/.test(lastMsg.content)) ||
       (lastMsg.content.toLowerCase().includes("resultado final") && /\d+%/.test(lastMsg.content)) ||
-      // New broader patterns
+      (/padr[ãa]o\s+psicol[óo]gico\s+central/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
       (/relat[óo]rio\s+de\s+perfil/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
       (/resumo\s+executivo/i.test(lastMsg.content) && /Tipo\s+\d+/i.test(lastMsg.content)) ||
-      (/perfil\s+eneagram[áa]tico/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content)) ||
-      (/diagnóstico|diagn[óo]stico/i.test(lastMsg.content) && /Tipo\s+\d+.*\d+%/i.test(lastMsg.content) && lastMsg.content.length > 1500) ||
-      // Long final message with type + percentage (likely a report)
-      (lastMsg.content.length > 2000 && /Tipo\s+\d+/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content) && /(motiva[çc][ãa]o|medo|asa|subtipo|integra[çc][ãa]o)/i.test(lastMsg.content))
+      (lastMsg.content.length > 2000 && /Tipo\s+\d+/i.test(lastMsg.content) && /\d+%/.test(lastMsg.content) && /(motiva[çc][ãa]o|medo|asa|subtipo|integra[çc][ãa]o|padr[ãa]o|crescimento)/i.test(lastMsg.content))
     );
 
   // Show manual save button when interview seems advanced but not auto-detected as done
   const showManualSave = !autoSaved && !interviewDone && hasEnoughMessages && !isLoading && lastMsg?.role === "assistant" && 
     (/Tipo\s+\d+/i.test(lastMsg.content) && lastMsg.content.length > 800);
 
+  // Phase detection based on message count (conversational flow)
   const currentPhase = interviewDone
     ? 4
-    : hasInstinctQuestionnaire
-    ? 2
-    : hasTypeQuestionnaire
-    ? 1
-    : userMsgCount >= 25
+    : userMsgCount >= 50
     ? 3
+    : userMsgCount >= 30
+    ? 2
+    : userMsgCount >= 15
+    ? 1
     : 0;
 
   // Auto-save when interview is done
