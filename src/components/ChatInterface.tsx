@@ -610,15 +610,14 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
           className="text-center max-w-lg"
         >
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-4">
-            Pronto para se conhecer melhor?
+            Pronto para olhar para dentro?
           </h2>
           <p className="text-muted-foreground font-body leading-relaxed mb-8">
-            A entrevista será conduzida por uma IA especializada em Eneagrama.
-            Responda com sinceridade — não existem respostas certas ou erradas.
-            A conversa dura entre 25 a 40 perguntas.
+            Uma conversa tranquila e profunda, sem pressa e sem respostas certas.
+            Responda com sinceridade — o mais importante é ser autêntico.
           </p>
-          <Button variant="hero" size="lg" onClick={startInterview} className="px-10 py-6 text-lg rounded-xl">
-            Iniciar Entrevista
+          <Button variant="hero" size="lg" onClick={startInterview} className="px-10 py-6 text-lg rounded-2xl glow-warm">
+            Iniciar Jornada
           </Button>
         </motion.div>
       </div>
