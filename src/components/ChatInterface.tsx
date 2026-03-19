@@ -634,7 +634,7 @@ const ChatInterface = ({ onBack, onResultSaved }: ChatInterfaceProps) => {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           )}
-          <h2 className="font-heading text-xl font-semibold text-foreground">Entrevista de Eneagrama</h2>
+          <h2 className="font-heading text-xl font-semibold text-foreground">Sua Jornada Interior</h2>
         </div>
         <div className="flex items-center gap-2">
           {showManualSave && (
