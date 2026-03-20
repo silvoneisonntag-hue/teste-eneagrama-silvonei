@@ -364,7 +364,7 @@ export const generateEnneagramPDF = (
   sectionBanner("GRÁFICOS");
 
   // Bar chart of top 3 types
-  sectionTitle("PERFIS ENEAGRAMA");
+  sectionTitle("PERFIS IDENTIFICADOS");
 
   const types: { name: string; pct: number; color: [number, number, number] }[] = [];
   if (result.type_1_pct > 0) types.push({ name: result.type_1_name, pct: result.type_1_pct, color: C.chartColors[0] });
