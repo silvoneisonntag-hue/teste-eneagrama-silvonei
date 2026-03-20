@@ -71,10 +71,10 @@ export function exportDashboardPDF(data: DashboardExportData) {
   const addRow = (label: string, value: string) => {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(75, 85, 99);
+    doc.setTextColor(120, 110, 115);
     doc.text(label, 14, y);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(17, 24, 39);
+    doc.setTextColor(45, 45, 45);
     doc.text(value, 90, y);
     y += 5.5;
   };
