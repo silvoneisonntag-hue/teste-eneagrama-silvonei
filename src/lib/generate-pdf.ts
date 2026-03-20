@@ -49,31 +49,31 @@ export const REPORT_LEVEL_LABELS: Record<ReportLevel, string> = {
   completo: "Completo",
 };
 
-// Color palette inspired by the reference model
+// Color palette — warm "Mapa Interior" design system
 const C = {
-  white: [255, 255, 255] as const,
-  darkPurple: [35, 20, 60] as const,
-  purple: [60, 35, 100] as const,
-  purpleLight: [100, 70, 150] as const,
-  gold: [180, 140, 40] as const,
-  goldDark: [150, 110, 15] as const,
-  goldBg: [245, 235, 210] as const,
-  gray: [120, 110, 130] as const,
-  lightGray: [230, 225, 235] as const,
-  green: [40, 140, 90] as const,
-  orange: [200, 120, 30] as const,
-  blue: [60, 100, 180] as const,
-  red: [180, 50, 50] as const,
+  white: [247, 245, 242] as const,       // #F7F5F2
+  darkPurple: [45, 45, 45] as const,     // #2D2D2D (foreground)
+  purple: [109, 104, 117] as const,      // #6D6875 (primary)
+  purpleLight: [181, 131, 141] as const, // #B5838D (accent)
+  gold: [181, 131, 141] as const,        // accent as accent bar
+  goldDark: [139, 90, 100] as const,     // darker accent
+  goldBg: [247, 240, 235] as const,      // warm light bg for banners
+  gray: [120, 110, 115] as const,        // muted
+  lightGray: [235, 228, 225] as const,   // soft warm gray
+  green: [120, 150, 120] as const,       // muted sage green
+  orange: [190, 140, 100] as const,      // warm amber
+  blue: [120, 130, 150] as const,        // muted blue
+  red: [181, 100, 100] as const,         // muted warm red
   chartColors: [
-    [60, 35, 100],    // purple
-    [60, 100, 180],   // blue
-    [40, 140, 90],    // green
-    [200, 120, 30],   // orange
-    [180, 50, 50],    // red
-    [150, 110, 15],   // gold
-    [100, 70, 150],   // light purple
-    [70, 130, 170],   // teal
-    [180, 100, 120],  // pink
+    [181, 131, 141],  // accent rose
+    [109, 104, 117],  // primary purple-gray
+    [120, 150, 120],  // sage green
+    [190, 140, 100],  // warm amber
+    [150, 120, 140],  // dusty mauve
+    [139, 90, 100],   // deep rose
+    [160, 145, 130],  // warm taupe
+    [130, 150, 160],  // slate blue
+    [170, 130, 110],  // terra cotta
   ] as [number, number, number][],
 };
 
