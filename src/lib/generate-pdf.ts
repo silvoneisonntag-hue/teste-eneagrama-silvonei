@@ -82,31 +82,61 @@ type Color = readonly [number, number, number];
 // Fixed introductory texts
 const INTRO_TEXT = `Bem-vindo à sua Jornada de Autoconhecimento!\n\nEste relatório é o resultado de uma investigação profunda sobre os padrões que organizam a forma como você sente, pensa e age. A partir de uma conversa cuidadosa, identificamos as estruturas emocionais e comportamentais que moldam suas escolhas, seus relacionamentos e sua forma de estar no mundo.\n\nDiferente de testes superficiais, este processo revela as motivações profundas, os medos centrais e os ciclos repetitivos que operam — muitas vezes sem que você perceba. Este relatório traz uma análise personalizada para ajudá-lo a se entender melhor, com insights práticos que podem transformar sua vida.`;
 
-const ORIGIN_TEXT = `O Eneagrama tem raízes profundas que remontam a tradições antigas, com influências de diversas culturas, como o misticismo sufi e a filosofia pitagórica. No início do século XX, o símbolo foi introduzido no Ocidente por G.I. Gurdjieff como uma ferramenta para o desenvolvimento da consciência.\n\nMas foi na segunda metade do século que o Eneagrama ganhou sua forma moderna, graças a pensadores como Oscar Ichazo, que o conectou à psicologia, e Claudio Naranjo, que explorou os padrões emocionais de cada tipo. Mais tarde, autores como Don Richard Riso e Russ Hudson popularizaram o sistema com o livro The Wisdom of the Enneagram, trazendo conceitos como os níveis de saúde e as dinâmicas de crescimento. Hoje, o Eneagrama é uma ferramenta global para o autoconhecimento, usada por milhões de pessoas para entenderem melhor a si mesmas e aos outros.`;
+const ORIGIN_TEXT = `Este processo se baseia em uma investigação profunda dos padrões emocionais, comportamentais e relacionais que moldam a personalidade humana. Combinamos sabedoria de tradições psicológicas com uma abordagem sistêmica moderna.\n\nAo longo de uma conversa cuidadosa, identificamos as estruturas internas que organizam a forma como você pensa, sente e age — revelando motivações profundas, medos centrais e dinâmicas que operam muitas vezes de forma inconsciente. Este mapeamento permite um nível de autoconhecimento que vai muito além de testes superficiais.`;
 
-const NINE_TYPES_TEXT = [
-  "Tipo 1 - O Perfeccionista: Ética. Movido por um desejo de integridade, teme a imperfeição e busca melhorar o mundo com responsabilidade.",
-  "Tipo 2 - O Prestativo: Generosidade. Guiado pelo desejo de ser amado, teme a rejeição e prioriza ajudar os outros.",
-  "Tipo 3 - O Bem-Sucedido: Sucesso. Motivado por reconhecimento, teme o fracasso e adapta-se para alcançar seus objetivos.",
-  "Tipo 4 - O Individualista: Autenticidade. Busca significado, teme ser comum e expressa-se por meio da criatividade e da emoção.",
-  "Tipo 5 - O Observador: Conhecimento. Movido pela busca de saber, teme a incompetência e valoriza a independência intelectual.",
-  "Tipo 6 - O Leal: Segurança. Guiado pela necessidade de estabilidade, teme o abandono e busca apoio através da lealdade.",
-  "Tipo 7 - O Entusiasta: Liberdade. Motivado por novas experiências, teme a dor e evita limitações com otimismo e aventura.",
-  "Tipo 8 - O Desafiador: Força. Busca proteção, teme a vulnerabilidade e age com assertividade para defender a si e aos outros.",
-  "Tipo 9 - O Pacificador: Harmonia. Deseja paz, teme o conflito e media situações com paciência e aceitação.",
-];
+const DYNAMICS_TEXT = `Sua personalidade não é estática — ela se transforma de acordo com o contexto, o nível de saúde emocional e as relações que você mantém. As dinâmicas internas mostram como você cresce ou enfrenta desafios.\n\nQuando está em crescimento (integração), você adota qualidades positivas de outros padrões; sob pressão (estresse), pode manifestar comportamentos mais reativos e defensivos.`;
 
-const DYNAMICS_TEXT = `O Eneagrama é um sistema dinâmico, e suas conexões mostram como sua personalidade pode evoluir e se transformar. As asas são os tipos ao lado do seu, que adicionam nuances ao seu perfil. As direções de integração e estresse mostram como você cresce ou enfrenta desafios.\n\nQuando está em crescimento (integração), você adota qualidades positivas de outro tipo; sob pressão (estresse), pode manifestar comportamentos mais difíceis de um tipo diferente.`;
+const HEALTH_INTRO_TEXT = `Os Níveis de Saúde mostram como você está vivendo suas qualidades e enfrentando seus desafios:\n\n• Saudável: Suas melhores qualidades brilham naturalmente, inspirando você e quem está ao seu redor.\n• Médio: Um momento de equilíbrio, onde você está crescendo. Suas forças estão presentes, mas desafios podem surgir.\n• Não Saudável: Um ponto em que os desafios pesam mais, mas este é também um convite para se reconectar com sua essência.`;
 
-const HEALTH_INTRO_TEXT = `Um dos conceitos mais poderosos do Eneagrama é o de Níveis de Saúde, que mostra como você está vivendo suas qualidades e enfrentando seus desafios:\n\n• Saudável: Suas melhores qualidades brilham naturalmente, inspirando você e quem está ao seu redor.\n• Médio: Um momento de equilíbrio, onde você está crescendo. Suas forças estão presentes, mas desafios podem surgir.\n• Não Saudável: Um ponto em que os desafios pesam mais, mas este é também um convite para se reconectar com sua essência.`;
-
-const PRACTICAL_TEXT = `O Eneagrama não é apenas teoria — é uma ferramenta prática que você pode usar para transformar sua vida. Ele é amplamente aplicado em áreas como coaching, terapia, liderança e até na vida cotidiana, ajudando a identificar pontos cegos e a encontrar caminhos para o crescimento.\n\nCom este relatório, você terá insights práticos para aplicar o Eneagrama no seu dia a dia, seja para tomar decisões mais conscientes, fortalecer conexões ou alcançar seus objetivos com mais clareza.`;
+const PRACTICAL_TEXT = `Este mapeamento não é apenas teoria — é uma ferramenta prática para transformar sua vida. Ele é aplicado em áreas como coaching, terapia, liderança e relacionamentos, ajudando a identificar pontos cegos e a encontrar caminhos para o crescimento.\n\nCom este relatório, você terá insights práticos para aplicar no seu dia a dia, seja para tomar decisões mais conscientes, fortalecer conexões ou alcançar seus objetivos com mais clareza.`;
 
 const RESOURCES_TEXT = [
   { cat: "Livros", items: ["A Sabedoria do Eneagrama — Don Richard Riso e Russ Hudson", "O Caminho do Eneagrama — Beatrice Chestnut"] },
   { cat: "Sites", items: ["The Enneagram Institute (enneagraminstitute.com)", "Integrative 9 (integrative9.com)"] },
   { cat: "Podcasts", items: ["The Enneagram Journey", "Typology — por Ian Morgan Cron"] },
 ];
+
+// 10-section parser matching the AI report structure
+const SECTION_HEADINGS = [
+  { pattern: /padr[ãa]o\s+psicol[óo]gico\s+central/i, title: "Padrão Psicológico Central" },
+  { pattern: /mecanismo\s+interno/i, title: "Mecanismo Interno e Estratégias" },
+  { pattern: /origem\s+emocional/i, title: "Origem Emocional e Adaptação Primária" },
+  { pattern: /express[ãa]o\s+instintiva/i, title: "Expressão Instintiva e Foco de Energia" },
+  { pattern: /integra[çc][ãa]o\s+do\s+subtipo/i, title: "Integração do Subtipo e Dinâmica Única" },
+  { pattern: /for[çc]as\s+e\s+recursos/i, title: "Forças e Recursos" },
+  { pattern: /pontos\s+cegos/i, title: "Pontos Cegos e Desafios" },
+  { pattern: /ciclos\s+repetitivos/i, title: "Ciclos Repetitivos e Padrões Sistêmicos" },
+  { pattern: /caminho\s+de\s+crescimento/i, title: "Caminho de Crescimento e Evolução" },
+  { pattern: /reflex[ãa]o\s+final/i, title: "Reflexão Final" },
+];
+
+function parseSummaryIntoSections(summary: string): { title: string; content: string }[] {
+  const lines = summary.split("\n");
+  const sections: { title: string; content: string }[] = [];
+  let currentTitle = "";
+  let currentContent: string[] = [];
+
+  for (const line of lines) {
+    const cleanLine = line.replace(/^#+\s*/, "").replace(/\*+/g, "").trim();
+    const match = SECTION_HEADINGS.find(h => h.pattern.test(cleanLine));
+
+    if (match) {
+      if (currentTitle && currentContent.length > 0) {
+        sections.push({ title: currentTitle, content: currentContent.join("\n").trim() });
+      }
+      currentTitle = match.title;
+      currentContent = [];
+    } else if (currentTitle) {
+      currentContent.push(line);
+    }
+  }
+
+  if (currentTitle && currentContent.length > 0) {
+    sections.push({ title: currentTitle, content: currentContent.join("\n").trim() });
+  }
+
+  return sections;
+}
 
 export const generateEnneagramPDF = (
   result: PDFResult,
