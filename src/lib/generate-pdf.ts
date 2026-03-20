@@ -314,7 +314,7 @@ export const generateEnneagramPDF = (
   if (level !== "basico") {
     newPage();
     headerLine();
-    sectionBanner("O Eneagrama");
+    sectionBanner("A Jornada de Autoconhecimento");
 
     sectionTitle("Introdução");
     text(INTRO_TEXT, 9, C.darkPurple);
