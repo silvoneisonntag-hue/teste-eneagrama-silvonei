@@ -82,7 +82,19 @@ type Color = readonly [number, number, number];
 // Fixed introductory texts
 const INTRO_TEXT = `Bem-vindo à sua Jornada de Autoconhecimento!\n\nEste relatório é o resultado de uma investigação profunda sobre os padrões que organizam a forma como você sente, pensa e age. A partir de uma conversa cuidadosa, identificamos as estruturas emocionais e comportamentais que moldam suas escolhas, seus relacionamentos e sua forma de estar no mundo.\n\nDiferente de testes superficiais, este processo revela as motivações profundas, os medos centrais e os ciclos repetitivos que operam — muitas vezes sem que você perceba. Este relatório traz uma análise personalizada para ajudá-lo a se entender melhor, com insights práticos que podem transformar sua vida.`;
 
-const ORIGIN_TEXT = `O Eneagrama tem raízes profundas que remontam a tradições antigas, com influências de diversas culturas, como o misticismo sufi e a filosofia pitagórica. No início do século XX, o símbolo foi introduzido no Ocidente por G.I. Gurdjieff como uma ferramenta para o desenvolvimento da consciência.\n\nMas foi na segunda metade do século que o Eneagrama ganhou sua forma moderna, graças a pensadores como Oscar Ichazo, que o conectou à psicologia, e Claudio Naranjo, que explorou os padrões emocionais de cada tipo. Mais tarde, autores como Don Richard Riso e Russ Hudson popularizaram o sistema com o livro The Wisdom of the Enneagram, trazendo conceitos como os níveis de saúde e as dinâmicas de crescimento. Hoje, o Eneagrama é uma ferramenta global para o autoconhecimento, usada por milhões de pessoas para entenderem melhor a si mesmas e aos outros.`;
+const ORIGIN_TEXT = `Este processo se baseia em uma investigação profunda dos padrões emocionais, comportamentais e relacionais que moldam a personalidade humana. Combinamos sabedoria de tradições psicológicas com uma abordagem sistêmica moderna.\n\nAo longo de uma conversa cuidadosa, identificamos as estruturas internas que organizam a forma como você pensa, sente e age — revelando motivações profundas, medos centrais e dinâmicas que operam muitas vezes de forma inconsciente. Este mapeamento permite um nível de autoconhecimento que vai muito além de testes superficiais.`;
+
+const DYNAMICS_TEXT = `Sua personalidade não é estática — ela se transforma de acordo com o contexto, o nível de saúde emocional e as relações que você mantém. As dinâmicas internas mostram como você cresce ou enfrenta desafios.\n\nQuando está em crescimento (integração), você adota qualidades positivas de outros padrões; sob pressão (estresse), pode manifestar comportamentos mais reativos e defensivos.`;
+
+const HEALTH_INTRO_TEXT = `Os Níveis de Saúde mostram como você está vivendo suas qualidades e enfrentando seus desafios:\n\n• Saudável: Suas melhores qualidades brilham naturalmente, inspirando você e quem está ao seu redor.\n• Médio: Um momento de equilíbrio, onde você está crescendo. Suas forças estão presentes, mas desafios podem surgir.\n• Não Saudável: Um ponto em que os desafios pesam mais, mas este é também um convite para se reconectar com sua essência.`;
+
+const PRACTICAL_TEXT = `Este mapeamento não é apenas teoria — é uma ferramenta prática para transformar sua vida. Ele é aplicado em áreas como coaching, terapia, liderança e relacionamentos, ajudando a identificar pontos cegos e a encontrar caminhos para o crescimento.\n\nCom este relatório, você terá insights práticos para aplicar no seu dia a dia, seja para tomar decisões mais conscientes, fortalecer conexões ou alcançar seus objetivos com mais clareza.`;
+
+const RESOURCES_TEXT = [
+  { cat: "Livros", items: ["A Sabedoria do Eneagrama — Don Richard Riso e Russ Hudson", "O Caminho do Eneagrama — Beatrice Chestnut"] },
+  { cat: "Sites", items: ["The Enneagram Institute (enneagraminstitute.com)", "Integrative 9 (integrative9.com)"] },
+  { cat: "Podcasts", items: ["The Enneagram Journey", "Typology — por Ian Morgan Cron"] },
+];
 
 const NINE_TYPES_TEXT = [
   "Tipo 1 - O Perfeccionista: Ética. Movido por um desejo de integridade, teme a imperfeição e busca melhorar o mundo com responsabilidade.",
@@ -96,17 +108,47 @@ const NINE_TYPES_TEXT = [
   "Tipo 9 - O Pacificador: Harmonia. Deseja paz, teme o conflito e media situações com paciência e aceitação.",
 ];
 
-const DYNAMICS_TEXT = `O Eneagrama é um sistema dinâmico, e suas conexões mostram como sua personalidade pode evoluir e se transformar. As asas são os tipos ao lado do seu, que adicionam nuances ao seu perfil. As direções de integração e estresse mostram como você cresce ou enfrenta desafios.\n\nQuando está em crescimento (integração), você adota qualidades positivas de outro tipo; sob pressão (estresse), pode manifestar comportamentos mais difíceis de um tipo diferente.`;
-
-const HEALTH_INTRO_TEXT = `Um dos conceitos mais poderosos do Eneagrama é o de Níveis de Saúde, que mostra como você está vivendo suas qualidades e enfrentando seus desafios:\n\n• Saudável: Suas melhores qualidades brilham naturalmente, inspirando você e quem está ao seu redor.\n• Médio: Um momento de equilíbrio, onde você está crescendo. Suas forças estão presentes, mas desafios podem surgir.\n• Não Saudável: Um ponto em que os desafios pesam mais, mas este é também um convite para se reconectar com sua essência.`;
-
-const PRACTICAL_TEXT = `O Eneagrama não é apenas teoria — é uma ferramenta prática que você pode usar para transformar sua vida. Ele é amplamente aplicado em áreas como coaching, terapia, liderança e até na vida cotidiana, ajudando a identificar pontos cegos e a encontrar caminhos para o crescimento.\n\nCom este relatório, você terá insights práticos para aplicar o Eneagrama no seu dia a dia, seja para tomar decisões mais conscientes, fortalecer conexões ou alcançar seus objetivos com mais clareza.`;
-
-const RESOURCES_TEXT = [
-  { cat: "Livros", items: ["A Sabedoria do Eneagrama — Don Richard Riso e Russ Hudson", "O Caminho do Eneagrama — Beatrice Chestnut"] },
-  { cat: "Sites", items: ["The Enneagram Institute (enneagraminstitute.com)", "Integrative 9 (integrative9.com)"] },
-  { cat: "Podcasts", items: ["The Enneagram Journey", "Typology — por Ian Morgan Cron"] },
+// 10-section parser matching the AI report structure
+const SECTION_HEADINGS = [
+  { pattern: /padr[ãa]o\s+psicol[óo]gico\s+central/i, title: "Padrão Psicológico Central" },
+  { pattern: /mecanismo\s+interno/i, title: "Mecanismo Interno e Estratégias" },
+  { pattern: /origem\s+emocional/i, title: "Origem Emocional e Adaptação Primária" },
+  { pattern: /express[ãa]o\s+instintiva/i, title: "Expressão Instintiva e Foco de Energia" },
+  { pattern: /integra[çc][ãa]o\s+do\s+subtipo/i, title: "Integração do Subtipo e Dinâmica Única" },
+  { pattern: /for[çc]as\s+e\s+recursos/i, title: "Forças e Recursos" },
+  { pattern: /pontos\s+cegos/i, title: "Pontos Cegos e Desafios" },
+  { pattern: /ciclos\s+repetitivos/i, title: "Ciclos Repetitivos e Padrões Sistêmicos" },
+  { pattern: /caminho\s+de\s+crescimento/i, title: "Caminho de Crescimento e Evolução" },
+  { pattern: /reflex[ãa]o\s+final/i, title: "Reflexão Final" },
 ];
+
+function parseSummaryIntoSections(summary: string): { title: string; content: string }[] {
+  const lines = summary.split("\n");
+  const sections: { title: string; content: string }[] = [];
+  let currentTitle = "";
+  let currentContent: string[] = [];
+
+  for (const line of lines) {
+    const cleanLine = line.replace(/^#+\s*/, "").replace(/\*+/g, "").trim();
+    const match = SECTION_HEADINGS.find(h => h.pattern.test(cleanLine));
+
+    if (match) {
+      if (currentTitle && currentContent.length > 0) {
+        sections.push({ title: currentTitle, content: currentContent.join("\n").trim() });
+      }
+      currentTitle = match.title;
+      currentContent = [];
+    } else if (currentTitle) {
+      currentContent.push(line);
+    }
+  }
+
+  if (currentTitle && currentContent.length > 0) {
+    sections.push({ title: currentTitle, content: currentContent.join("\n").trim() });
+  }
+
+  return sections;
+}
 
 export const generateEnneagramPDF = (
   result: PDFResult,
@@ -320,7 +362,7 @@ export const generateEnneagramPDF = (
     text(INTRO_TEXT, 9, C.darkPurple);
     separator();
 
-    sectionTitle("Origem e Evolução");
+    sectionTitle("Fundamentação e Abordagem");
     text(ORIGIN_TEXT, 9, C.darkPurple);
   }
 
@@ -330,16 +372,16 @@ export const generateEnneagramPDF = (
   if (level !== "basico") {
     newPage();
     headerLine();
-    sectionBanner("Os Nove Tipos de Personalidade");
+    sectionBanner("Os Nove Padrões de Personalidade");
 
-    text("No centro do Eneagrama estão os nove tipos de personalidade, cada um com uma essência única, moldada por motivações e medos profundos. Os tipos são agrupados em três centros: instintivo (Tipos 8, 9, 1), emocional (Tipos 2, 3, 4) e mental (Tipos 5, 6, 7).", 9, C.darkPurple);
+    text("No centro deste sistema estão nove padrões de personalidade, cada um com uma essência única, moldada por motivações e medos profundos. Os padrões são agrupados em três centros: instintivo (8, 9, 1), emocional (2, 3, 4) e mental (5, 6, 7).", 9, C.darkPurple);
 
     for (const t of NINE_TYPES_TEXT) {
       bullet(t, C.darkPurple, C.gold);
     }
 
     separator();
-    sectionTitle("Dinâmicas: Asas, Integração e Estresse");
+    sectionTitle("Dinâmicas: Integração e Estresse");
     text(DYNAMICS_TEXT, 9, C.darkPurple);
   }
 
@@ -434,128 +476,40 @@ export const generateEnneagramPDF = (
   if (result.tritype) field("Tritipo:", result.tritype);
 
   // ═══════════════════════════════════════════════════════════
-  // AI-GENERATED SECTIONS (intermediário + completo)
+  // 10 ANALYSIS SECTIONS (parsed from summary)
   // ═══════════════════════════════════════════════════════════
-  const s = sections || {};
+  if (result.summary && (level === "intermediario" || level === "completo")) {
+    const parsedSections = parseSummaryIntoSections(result.summary);
 
-  // Dominant Profile
-  if (s.perfil_dominante && (level === "intermediario" || level === "completo")) {
-    check(40);
+    if (parsedSections.length > 0) {
+      for (let i = 0; i < parsedSections.length; i++) {
+        const sec = parsedSections[i];
+        // For basico level, only show first 3 sections
+        if (level === "intermediario" && i >= 5) break;
+
+        check(40);
+        separator();
+        const sectionNum = String(i + 1).padStart(2, "0");
+        sectionBanner(`${sectionNum}  ·  ${sec.title}`);
+        const cleanContent = sec.content.replace(/[#*_`]/g, "");
+        text(cleanContent, 9, C.darkPurple);
+      }
+    } else {
+      // Fallback: render full summary if sections not parseable
+      check(40);
+      separator();
+      sectionBanner("ANÁLISE COMPLETA");
+      const cleanSummary = result.summary.replace(/[#*_`]/g, "");
+      text(cleanSummary, 9, C.darkPurple);
+    }
+  }
+
+  // Legacy AI-generated sections (kept for backward compat with old reports)
+  const s = sections || {};
+  if (!result.summary && s.perfil_dominante && (level === "intermediario" || level === "completo")) {
     separator();
     sectionBanner(`Seu Perfil Dominante: ${result.type_1_name}`);
     text(s.perfil_dominante, 9, C.darkPurple);
-  }
-
-  // Characteristics
-  if (s.caracteristicas && (level === "intermediario" || level === "completo")) {
-    separator();
-    sectionTitle(`Características Principais: ${result.type_1_name}`);
-    text(s.caracteristicas, 9, C.darkPurple);
-  }
-
-  // Motivations & Fears (completo only)
-  if (s.motivacoes_medos && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Motivações e Medos: ${result.type_1_name}`);
-    text(s.motivacoes_medos, 9, C.darkPurple);
-  }
-
-  // Behaviors (completo only)
-  if (s.comportamentos && level === "completo") {
-    separator();
-    sectionTitle(`Comportamentos: ${result.type_1_name}`);
-    text(s.comportamentos, 9, C.darkPurple);
-  }
-
-  // Team & Conflicts (completo only)
-  if (s.equipe_conflitos && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Como age em equipe e lida com conflitos`);
-    text(s.equipe_conflitos, 9, C.darkPurple);
-  }
-
-  // Wings influence (completo only)
-  if (s.influencia_asas && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Influência das Asas no perfil ${result.type_1_name}`);
-    text(s.influencia_asas, 9, C.darkPurple);
-  }
-
-  // Secondary profile influence (completo only)
-  if (s.influencia_secundario && level === "completo" && result.type_2_name) {
-    separator();
-    sectionTitle(`Influência do Perfil Secundário: ${result.type_2_name}`);
-    text(s.influencia_secundario, 9, C.darkPurple);
-  }
-
-  // Integration (completo only)
-  if (s.integracao && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Pontos de Integração: ${result.type_1_name}`);
-    if (result.integration_direction) {
-      text(`Integra com: ${result.integration_direction}`, 10, C.green, true);
-    }
-    text(s.integracao, 9, C.darkPurple);
-  }
-
-  // Stress (completo only)
-  if (s.estresse && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Pontos de Estresse: ${result.type_1_name}`);
-    if (result.disintegration_direction) {
-      text(`Estressa como: ${result.disintegration_direction}`, 10, C.red, true);
-    }
-    text(s.estresse, 9, C.darkPurple);
-  }
-
-  // Health Level detail
-  if (s.nivel_saude && (level === "intermediario" || level === "completo")) {
-    check(40);
-    separator();
-    sectionBanner(`Nível de Saúde: ${result.type_1_name}`);
-    text(s.nivel_saude, 9, C.darkPurple);
-  }
-
-  // Skills
-  if (s.habilidades_naturais?.length && (level === "intermediario" || level === "completo")) {
-    separator();
-    sectionTitle("HABILIDADES NATURAIS");
-    for (const skill of s.habilidades_naturais) {
-      bullet(skill, C.darkPurple, C.green);
-    }
-  }
-
-  if (s.habilidades_desenvolver?.length && (level === "intermediario" || level === "completo")) {
-    separator();
-    sectionTitle("HABILIDADES A DESENVOLVER");
-    for (const skill of s.habilidades_desenvolver) {
-      bullet(skill, C.darkPurple, C.orange);
-    }
-  }
-
-  // Reflection questions (completo only)
-  if (s.reflexao?.length && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner("REFLITA UM POUCO");
-    text(`Como ${result.type_1_name.split(" - ")[0] || result.type_1_name}, estas perguntas o convidarão a explorar sua jornada:`, 9, C.gray);
-    for (const q of s.reflexao) {
-      bullet(q, C.darkPurple, C.purple);
-    }
-  }
-
-  // Full analysis from summary (completo only)
-  if (result.summary && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner("ANÁLISE COMPLETA");
-    const cleanSummary = result.summary.replace(/[#*_`]/g, "");
-    text(cleanSummary, 9, C.darkPurple);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -627,7 +581,7 @@ export const generateEnneagramPDF = (
     newPage();
     headerLine();
     sectionBanner("ÁREA BÔNUS");
-    sectionTitle("Aprofunde-se no Eneagrama");
+    sectionTitle("Aprofunde Sua Jornada");
 
     for (const res of RESOURCES_TEXT) {
       check(12);
@@ -658,11 +612,11 @@ export const generateEnneagramPDF = (
   y += 2;
 
   sectionTitle("Uso do Material");
-  text("O Relatório Personalizado de Eneagrama foi desenvolvido para fins de autoconhecimento e desenvolvimento pessoal. As informações aqui contidas não substituem aconselhamento profissional, como psicológico, médico ou jurídico. Utilize este material como uma ferramenta de apoio em sua jornada de crescimento.", 8, C.gray);
+  text("Este relatório personalizado foi desenvolvido para fins de autoconhecimento e desenvolvimento pessoal. As informações aqui contidas não substituem aconselhamento profissional, como psicológico, médico ou jurídico. Utilize este material como uma ferramenta de apoio em sua jornada de crescimento.", 8, C.gray);
   y += 2;
 
   sectionTitle("Agradecimentos");
-  text("Agradecemos por escolher este relatório para apoiar sua jornada de autoconhecimento. Esperamos que ele traga insights valiosos e contribua para o fortalecimento das suas relações e do seu crescimento pessoal.\n\nContinue explorando o poder do Eneagrama e transformando desafios em oportunidades!", 9, C.darkPurple);
+  text("Agradecemos por escolher o Mapa Interior para apoiar sua jornada de autoconhecimento. Esperamos que ele traga insights valiosos e contribua para o fortalecimento das suas relações e do seu crescimento pessoal.\n\nContinue explorando seus padrões internos e transformando desafios em oportunidades!", 9, C.darkPurple);
 
   // ── Footer on last page ──
   const footerY = Math.max(y + 8, ph - 20);
