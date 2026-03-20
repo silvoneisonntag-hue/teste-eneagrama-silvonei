@@ -152,7 +152,7 @@ export const generateEnneagramPDF = (
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...col(C.gray));
     const name = result.profiles?.display_name || "Participante";
-    doc.text(`Relatório Eneagrama: ${name}`, m, 10);
+    doc.text(`Mapa Interior: ${name}`, m, 10);
   };
 
   const text = (t: string, size = 9, color: Color = C.darkPurple, bold = false, maxW = cw, xOffset = 0) => {
