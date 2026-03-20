@@ -362,7 +362,7 @@ export const generateEnneagramPDF = (
     text(INTRO_TEXT, 9, C.darkPurple);
     separator();
 
-    sectionTitle("Origem e Evolução");
+    sectionTitle("Fundamentação e Abordagem");
     text(ORIGIN_TEXT, 9, C.darkPurple);
   }
 
