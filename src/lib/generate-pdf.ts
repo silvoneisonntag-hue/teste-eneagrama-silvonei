@@ -96,6 +96,18 @@ const RESOURCES_TEXT = [
   { cat: "Podcasts", items: ["The Enneagram Journey", "Typology — por Ian Morgan Cron"] },
 ];
 
+const NINE_TYPES_TEXT = [
+  "Tipo 1 - O Perfeccionista: Ética. Movido por um desejo de integridade, teme a imperfeição e busca melhorar o mundo com responsabilidade.",
+  "Tipo 2 - O Prestativo: Generosidade. Guiado pelo desejo de ser amado, teme a rejeição e prioriza ajudar os outros.",
+  "Tipo 3 - O Bem-Sucedido: Sucesso. Motivado por reconhecimento, teme o fracasso e adapta-se para alcançar seus objetivos.",
+  "Tipo 4 - O Individualista: Autenticidade. Busca significado, teme ser comum e expressa-se por meio da criatividade e da emoção.",
+  "Tipo 5 - O Observador: Conhecimento. Movido pela busca de saber, teme a incompetência e valoriza a independência intelectual.",
+  "Tipo 6 - O Leal: Segurança. Guiado pela necessidade de estabilidade, teme o abandono e busca apoio através da lealdade.",
+  "Tipo 7 - O Entusiasta: Liberdade. Motivado por novas experiências, teme a dor e evita limitações com otimismo e aventura.",
+  "Tipo 8 - O Desafiador: Força. Busca proteção, teme a vulnerabilidade e age com assertividade para defender a si e aos outros.",
+  "Tipo 9 - O Pacificador: Harmonia. Deseja paz, teme o conflito e media situações com paciência e aceitação.",
+];
+
 // 10-section parser matching the AI report structure
 const SECTION_HEADINGS = [
   { pattern: /padr[ãa]o\s+psicol[óo]gico\s+central/i, title: "Padrão Psicológico Central" },
