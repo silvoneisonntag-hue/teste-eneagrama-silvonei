@@ -276,7 +276,7 @@ export const generateEnneagramPDF = (
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...col(C.goldDark));
-  doc.text("Tipo Dominante", pw / 2, y + 4, { align: "center" });
+  doc.text("Padrão Dominante", pw / 2, y + 4, { align: "center" });
   doc.setFontSize(18);
   doc.setTextColor(...col(C.darkPurple));
   doc.text(result.type_1_name, pw / 2, y + 16, { align: "center" });
