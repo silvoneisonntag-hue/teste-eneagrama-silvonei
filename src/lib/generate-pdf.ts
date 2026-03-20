@@ -616,7 +616,7 @@ export const generateEnneagramPDF = (
   y += 2;
 
   sectionTitle("Agradecimentos");
-  text("Agradecemos por escolher este relatório para apoiar sua jornada de autoconhecimento. Esperamos que ele traga insights valiosos e contribua para o fortalecimento das suas relações e do seu crescimento pessoal.\n\nContinue explorando o poder do Eneagrama e transformando desafios em oportunidades!", 9, C.darkPurple);
+  text("Agradecemos por escolher o Mapa Interior para apoiar sua jornada de autoconhecimento. Esperamos que ele traga insights valiosos e contribua para o fortalecimento das suas relações e do seu crescimento pessoal.\n\nContinue explorando seus padrões internos e transformando desafios em oportunidades!", 9, C.darkPurple);
 
   // ── Footer on last page ──
   const footerY = Math.max(y + 8, ph - 20);
