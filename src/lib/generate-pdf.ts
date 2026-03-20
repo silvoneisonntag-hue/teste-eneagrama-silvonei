@@ -674,7 +674,7 @@ export const generateEnneagramPDF = (
   }
 
   // Save
-  const fileName = `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
+  const fileName = `mapa-interior-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
 
   if (returnBlob) {
     return doc.output("blob");
