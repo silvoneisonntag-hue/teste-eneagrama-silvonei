@@ -581,7 +581,7 @@ export const generateEnneagramPDF = (
     newPage();
     headerLine();
     sectionBanner("ÁREA BÔNUS");
-    sectionTitle("Aprofunde-se no Eneagrama");
+    sectionTitle("Aprofunde Sua Jornada");
 
     for (const res of RESOURCES_TEXT) {
       check(12);
