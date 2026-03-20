@@ -476,128 +476,40 @@ export const generateEnneagramPDF = (
   if (result.tritype) field("Tritipo:", result.tritype);
 
   // ═══════════════════════════════════════════════════════════
-  // AI-GENERATED SECTIONS (intermediário + completo)
+  // 10 ANALYSIS SECTIONS (parsed from summary)
   // ═══════════════════════════════════════════════════════════
-  const s = sections || {};
+  if (result.summary && (level === "intermediario" || level === "completo")) {
+    const parsedSections = parseSummaryIntoSections(result.summary);
 
-  // Dominant Profile
-  if (s.perfil_dominante && (level === "intermediario" || level === "completo")) {
-    check(40);
+    if (parsedSections.length > 0) {
+      for (let i = 0; i < parsedSections.length; i++) {
+        const sec = parsedSections[i];
+        // For basico level, only show first 3 sections
+        if (level === "intermediario" && i >= 5) break;
+
+        check(40);
+        separator();
+        const sectionNum = String(i + 1).padStart(2, "0");
+        sectionBanner(`${sectionNum}  ·  ${sec.title}`);
+        const cleanContent = sec.content.replace(/[#*_`]/g, "");
+        text(cleanContent, 9, C.darkPurple);
+      }
+    } else {
+      // Fallback: render full summary if sections not parseable
+      check(40);
+      separator();
+      sectionBanner("ANÁLISE COMPLETA");
+      const cleanSummary = result.summary.replace(/[#*_`]/g, "");
+      text(cleanSummary, 9, C.darkPurple);
+    }
+  }
+
+  // Legacy AI-generated sections (kept for backward compat with old reports)
+  const s = sections || {};
+  if (!result.summary && s.perfil_dominante && (level === "intermediario" || level === "completo")) {
     separator();
     sectionBanner(`Seu Perfil Dominante: ${result.type_1_name}`);
     text(s.perfil_dominante, 9, C.darkPurple);
-  }
-
-  // Characteristics
-  if (s.caracteristicas && (level === "intermediario" || level === "completo")) {
-    separator();
-    sectionTitle(`Características Principais: ${result.type_1_name}`);
-    text(s.caracteristicas, 9, C.darkPurple);
-  }
-
-  // Motivations & Fears (completo only)
-  if (s.motivacoes_medos && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Motivações e Medos: ${result.type_1_name}`);
-    text(s.motivacoes_medos, 9, C.darkPurple);
-  }
-
-  // Behaviors (completo only)
-  if (s.comportamentos && level === "completo") {
-    separator();
-    sectionTitle(`Comportamentos: ${result.type_1_name}`);
-    text(s.comportamentos, 9, C.darkPurple);
-  }
-
-  // Team & Conflicts (completo only)
-  if (s.equipe_conflitos && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Como age em equipe e lida com conflitos`);
-    text(s.equipe_conflitos, 9, C.darkPurple);
-  }
-
-  // Wings influence (completo only)
-  if (s.influencia_asas && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Influência das Asas no perfil ${result.type_1_name}`);
-    text(s.influencia_asas, 9, C.darkPurple);
-  }
-
-  // Secondary profile influence (completo only)
-  if (s.influencia_secundario && level === "completo" && result.type_2_name) {
-    separator();
-    sectionTitle(`Influência do Perfil Secundário: ${result.type_2_name}`);
-    text(s.influencia_secundario, 9, C.darkPurple);
-  }
-
-  // Integration (completo only)
-  if (s.integracao && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Pontos de Integração: ${result.type_1_name}`);
-    if (result.integration_direction) {
-      text(`Integra com: ${result.integration_direction}`, 10, C.green, true);
-    }
-    text(s.integracao, 9, C.darkPurple);
-  }
-
-  // Stress (completo only)
-  if (s.estresse && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner(`Pontos de Estresse: ${result.type_1_name}`);
-    if (result.disintegration_direction) {
-      text(`Estressa como: ${result.disintegration_direction}`, 10, C.red, true);
-    }
-    text(s.estresse, 9, C.darkPurple);
-  }
-
-  // Health Level detail
-  if (s.nivel_saude && (level === "intermediario" || level === "completo")) {
-    check(40);
-    separator();
-    sectionBanner(`Nível de Saúde: ${result.type_1_name}`);
-    text(s.nivel_saude, 9, C.darkPurple);
-  }
-
-  // Skills
-  if (s.habilidades_naturais?.length && (level === "intermediario" || level === "completo")) {
-    separator();
-    sectionTitle("HABILIDADES NATURAIS");
-    for (const skill of s.habilidades_naturais) {
-      bullet(skill, C.darkPurple, C.green);
-    }
-  }
-
-  if (s.habilidades_desenvolver?.length && (level === "intermediario" || level === "completo")) {
-    separator();
-    sectionTitle("HABILIDADES A DESENVOLVER");
-    for (const skill of s.habilidades_desenvolver) {
-      bullet(skill, C.darkPurple, C.orange);
-    }
-  }
-
-  // Reflection questions (completo only)
-  if (s.reflexao?.length && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner("REFLITA UM POUCO");
-    text(`Como ${result.type_1_name.split(" - ")[0] || result.type_1_name}, estas perguntas o convidarão a explorar sua jornada:`, 9, C.gray);
-    for (const q of s.reflexao) {
-      bullet(q, C.darkPurple, C.purple);
-    }
-  }
-
-  // Full analysis from summary (completo only)
-  if (result.summary && level === "completo") {
-    check(40);
-    separator();
-    sectionBanner("ANÁLISE COMPLETA");
-    const cleanSummary = result.summary.replace(/[#*_`]/g, "");
-    text(cleanSummary, 9, C.darkPurple);
   }
 
   // ═══════════════════════════════════════════════════════════
