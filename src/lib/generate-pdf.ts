@@ -612,7 +612,7 @@ export const generateEnneagramPDF = (
   y += 2;
 
   sectionTitle("Uso do Material");
-  text("O Relatório Personalizado de Eneagrama foi desenvolvido para fins de autoconhecimento e desenvolvimento pessoal. As informações aqui contidas não substituem aconselhamento profissional, como psicológico, médico ou jurídico. Utilize este material como uma ferramenta de apoio em sua jornada de crescimento.", 8, C.gray);
+  text("Este relatório personalizado foi desenvolvido para fins de autoconhecimento e desenvolvimento pessoal. As informações aqui contidas não substituem aconselhamento profissional, como psicológico, médico ou jurídico. Utilize este material como uma ferramenta de apoio em sua jornada de crescimento.", 8, C.gray);
   y += 2;
 
   sectionTitle("Agradecimentos");
