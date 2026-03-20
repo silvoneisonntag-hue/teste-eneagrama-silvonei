@@ -259,7 +259,7 @@ export const generateEnneagramPDF = (
   }
 
   // Title
-  centeredText("Relatório Eneagrama", 26, C.gold);
+  centeredText("Mapa Interior", 26, C.gold);
   y += 2;
   centeredText(userName, 16, C.darkPurple);
   y += 6;
