@@ -131,11 +131,11 @@ export function exportDashboardPDF(data: DashboardExportData) {
     y += 2;
 
     // Table header
-    doc.setFillColor(243, 244, 246);
+    doc.setFillColor(247, 240, 235);
     doc.rect(14, y - 3, pageW - 28, 6, "F");
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(107, 114, 128);
+    doc.setTextColor(109, 104, 117);
     doc.text("CLIENTE", 16, y);
     doc.text("TIPO DOMINANTE", 80, y);
     doc.text("DATA", 150, y);
