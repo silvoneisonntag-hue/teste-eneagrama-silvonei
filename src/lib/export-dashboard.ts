@@ -55,7 +55,7 @@ export function exportDashboardPDF(data: DashboardExportData) {
   const addTitle = (text: string) => {
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(109, 40, 217);
+    doc.setTextColor(181, 131, 141);
     doc.text(text, 14, y);
     y += 8;
   };
