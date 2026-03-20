@@ -63,7 +63,7 @@ export function exportDashboardPDF(data: DashboardExportData) {
   const addSubtitle = (text: string) => {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(55, 65, 81);
+    doc.setTextColor(45, 45, 45);
     doc.text(text, 14, y);
     y += 6;
   };
