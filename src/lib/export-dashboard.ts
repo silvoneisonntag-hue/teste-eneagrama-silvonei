@@ -90,10 +90,10 @@ export function exportDashboardPDF(data: DashboardExportData) {
   addTitle("Relatório do Dashboard");
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(156, 163, 175);
+  doc.setTextColor(120, 110, 115);
   doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} • Admin: ${data.profileName}`, 14, y);
   y += 4;
-  doc.setDrawColor(229, 231, 235);
+  doc.setDrawColor(235, 228, 225);
   doc.line(14, y, pageW - 14, y);
   y += 10;
 
