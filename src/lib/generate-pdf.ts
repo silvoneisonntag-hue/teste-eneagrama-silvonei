@@ -49,38 +49,38 @@ export const REPORT_LEVEL_LABELS: Record<ReportLevel, string> = {
   completo: "Completo",
 };
 
-// Color palette inspired by the reference model
+// Color palette — warm "Mapa Interior" design system
 const C = {
-  white: [255, 255, 255] as const,
-  darkPurple: [35, 20, 60] as const,
-  purple: [60, 35, 100] as const,
-  purpleLight: [100, 70, 150] as const,
-  gold: [180, 140, 40] as const,
-  goldDark: [150, 110, 15] as const,
-  goldBg: [245, 235, 210] as const,
-  gray: [120, 110, 130] as const,
-  lightGray: [230, 225, 235] as const,
-  green: [40, 140, 90] as const,
-  orange: [200, 120, 30] as const,
-  blue: [60, 100, 180] as const,
-  red: [180, 50, 50] as const,
+  white: [247, 245, 242] as const,       // #F7F5F2
+  darkPurple: [45, 45, 45] as const,     // #2D2D2D (foreground)
+  purple: [109, 104, 117] as const,      // #6D6875 (primary)
+  purpleLight: [181, 131, 141] as const, // #B5838D (accent)
+  gold: [181, 131, 141] as const,        // accent as accent bar
+  goldDark: [139, 90, 100] as const,     // darker accent
+  goldBg: [247, 240, 235] as const,      // warm light bg for banners
+  gray: [120, 110, 115] as const,        // muted
+  lightGray: [235, 228, 225] as const,   // soft warm gray
+  green: [120, 150, 120] as const,       // muted sage green
+  orange: [190, 140, 100] as const,      // warm amber
+  blue: [120, 130, 150] as const,        // muted blue
+  red: [181, 100, 100] as const,         // muted warm red
   chartColors: [
-    [60, 35, 100],    // purple
-    [60, 100, 180],   // blue
-    [40, 140, 90],    // green
-    [200, 120, 30],   // orange
-    [180, 50, 50],    // red
-    [150, 110, 15],   // gold
-    [100, 70, 150],   // light purple
-    [70, 130, 170],   // teal
-    [180, 100, 120],  // pink
+    [181, 131, 141],  // accent rose
+    [109, 104, 117],  // primary purple-gray
+    [120, 150, 120],  // sage green
+    [190, 140, 100],  // warm amber
+    [150, 120, 140],  // dusty mauve
+    [139, 90, 100],   // deep rose
+    [160, 145, 130],  // warm taupe
+    [130, 150, 160],  // slate blue
+    [170, 130, 110],  // terra cotta
   ] as [number, number, number][],
 };
 
 type Color = readonly [number, number, number];
 
-// Fixed introductory texts (similar to reference model)
-const INTRO_TEXT = `Bem-vindo à Sua Jornada com o Eneagrama!\n\nVocê já se perguntou o que realmente motiva suas escolhas e comportamentos? O Eneagrama é uma ferramenta poderosa que combina sabedoria antiga e psicologia moderna para responder a essa pergunta, oferecendo uma jornada única de autoconhecimento e crescimento pessoal. Diferente de outros sistemas, o Eneagrama vai além de traços superficiais, revelando as motivações profundas, os medos centrais e os padrões que moldam quem você é e como se relaciona com o mundo.\n\nRepresentado por um símbolo de nove pontos interconectados, ele reflete a riqueza e a complexidade da personalidade humana. Este relatório, criado com base nas suas respostas, traz uma análise personalizada para ajudá-lo a se entender melhor, com insights práticos que podem transformar sua vida.`;
+// Fixed introductory texts
+const INTRO_TEXT = `Bem-vindo à sua Jornada de Autoconhecimento!\n\nEste relatório é o resultado de uma investigação profunda sobre os padrões que organizam a forma como você sente, pensa e age. A partir de uma conversa cuidadosa, identificamos as estruturas emocionais e comportamentais que moldam suas escolhas, seus relacionamentos e sua forma de estar no mundo.\n\nDiferente de testes superficiais, este processo revela as motivações profundas, os medos centrais e os ciclos repetitivos que operam — muitas vezes sem que você perceba. Este relatório traz uma análise personalizada para ajudá-lo a se entender melhor, com insights práticos que podem transformar sua vida.`;
 
 const ORIGIN_TEXT = `O Eneagrama tem raízes profundas que remontam a tradições antigas, com influências de diversas culturas, como o misticismo sufi e a filosofia pitagórica. No início do século XX, o símbolo foi introduzido no Ocidente por G.I. Gurdjieff como uma ferramenta para o desenvolvimento da consciência.\n\nMas foi na segunda metade do século que o Eneagrama ganhou sua forma moderna, graças a pensadores como Oscar Ichazo, que o conectou à psicologia, e Claudio Naranjo, que explorou os padrões emocionais de cada tipo. Mais tarde, autores como Don Richard Riso e Russ Hudson popularizaram o sistema com o livro The Wisdom of the Enneagram, trazendo conceitos como os níveis de saúde e as dinâmicas de crescimento. Hoje, o Eneagrama é uma ferramenta global para o autoconhecimento, usada por milhões de pessoas para entenderem melhor a si mesmas e aos outros.`;
 
@@ -152,7 +152,7 @@ export const generateEnneagramPDF = (
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...col(C.gray));
     const name = result.profiles?.display_name || "Participante";
-    doc.text(`Relatório Eneagrama: ${name}`, m, 10);
+    doc.text(`Mapa Interior: ${name}`, m, 10);
   };
 
   const text = (t: string, size = 9, color: Color = C.darkPurple, bold = false, maxW = cw, xOffset = 0) => {
@@ -259,7 +259,7 @@ export const generateEnneagramPDF = (
   }
 
   // Title
-  centeredText("Relatório Eneagrama", 26, C.gold);
+  centeredText("Mapa Interior", 26, C.gold);
   y += 2;
   centeredText(userName, 16, C.darkPurple);
   y += 6;
@@ -276,7 +276,7 @@ export const generateEnneagramPDF = (
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...col(C.goldDark));
-  doc.text("Tipo Dominante", pw / 2, y + 4, { align: "center" });
+  doc.text("Padrão Dominante", pw / 2, y + 4, { align: "center" });
   doc.setFontSize(18);
   doc.setTextColor(...col(C.darkPurple));
   doc.text(result.type_1_name, pw / 2, y + 16, { align: "center" });
@@ -314,7 +314,7 @@ export const generateEnneagramPDF = (
   if (level !== "basico") {
     newPage();
     headerLine();
-    sectionBanner("O Eneagrama");
+    sectionBanner("A Jornada de Autoconhecimento");
 
     sectionTitle("Introdução");
     text(INTRO_TEXT, 9, C.darkPurple);
@@ -364,7 +364,7 @@ export const generateEnneagramPDF = (
   sectionBanner("GRÁFICOS");
 
   // Bar chart of top 3 types
-  sectionTitle("PERFIS ENEAGRAMA");
+  sectionTitle("PERFIS IDENTIFICADOS");
 
   const types: { name: string; pct: number; color: [number, number, number] }[] = [];
   if (result.type_1_pct > 0) types.push({ name: result.type_1_name, pct: result.type_1_pct, color: C.chartColors[0] });
@@ -674,7 +674,7 @@ export const generateEnneagramPDF = (
   }
 
   // Save
-  const fileName = `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
+  const fileName = `mapa-interior-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
 
   if (returnBlob) {
     return doc.output("blob");
@@ -684,5 +684,5 @@ export const generateEnneagramPDF = (
 
 export const getPDFFileName = (result: PDFResult) => {
   const userName = result.profiles?.display_name || "Não informado";
-  return `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
+  return `mapa-interior-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
 };

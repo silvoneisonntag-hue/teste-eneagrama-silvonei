@@ -55,7 +55,7 @@ export function exportDashboardPDF(data: DashboardExportData) {
   const addTitle = (text: string) => {
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(109, 40, 217);
+    doc.setTextColor(181, 131, 141);
     doc.text(text, 14, y);
     y += 8;
   };
@@ -63,7 +63,7 @@ export function exportDashboardPDF(data: DashboardExportData) {
   const addSubtitle = (text: string) => {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(55, 65, 81);
+    doc.setTextColor(45, 45, 45);
     doc.text(text, 14, y);
     y += 6;
   };
@@ -71,10 +71,10 @@ export function exportDashboardPDF(data: DashboardExportData) {
   const addRow = (label: string, value: string) => {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(75, 85, 99);
+    doc.setTextColor(120, 110, 115);
     doc.text(label, 14, y);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(17, 24, 39);
+    doc.setTextColor(45, 45, 45);
     doc.text(value, 90, y);
     y += 5.5;
   };
@@ -90,10 +90,10 @@ export function exportDashboardPDF(data: DashboardExportData) {
   addTitle("Relatório do Dashboard");
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(156, 163, 175);
+  doc.setTextColor(120, 110, 115);
   doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} • Admin: ${data.profileName}`, 14, y);
   y += 4;
-  doc.setDrawColor(229, 231, 235);
+  doc.setDrawColor(235, 228, 225);
   doc.line(14, y, pageW - 14, y);
   y += 10;
 
@@ -131,18 +131,18 @@ export function exportDashboardPDF(data: DashboardExportData) {
     y += 2;
 
     // Table header
-    doc.setFillColor(243, 244, 246);
+    doc.setFillColor(247, 240, 235);
     doc.rect(14, y - 3, pageW - 28, 6, "F");
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(107, 114, 128);
+    doc.setTextColor(109, 104, 117);
     doc.text("CLIENTE", 16, y);
     doc.text("TIPO DOMINANTE", 80, y);
     doc.text("DATA", 150, y);
     y += 5;
 
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(55, 65, 81);
+    doc.setTextColor(45, 45, 45);
     data.recentResults.forEach((r) => {
       doc.setFontSize(9);
       doc.text(r.clientName, 16, y);
