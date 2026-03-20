@@ -142,7 +142,7 @@ export function exportDashboardPDF(data: DashboardExportData) {
     y += 5;
 
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(55, 65, 81);
+    doc.setTextColor(45, 45, 45);
     data.recentResults.forEach((r) => {
       doc.setFontSize(9);
       doc.text(r.clientName, 16, y);

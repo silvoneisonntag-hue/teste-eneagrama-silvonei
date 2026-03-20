@@ -684,5 +684,5 @@ export const generateEnneagramPDF = (
 
 export const getPDFFileName = (result: PDFResult) => {
   const userName = result.profiles?.display_name || "Não informado";
-  return `eneagrama-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
+  return `mapa-interior-${userName.replace(/\s+/g, "-")}-${new Date(result.created_at).toISOString().slice(0, 10)}.pdf`;
 };
